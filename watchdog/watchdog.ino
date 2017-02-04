@@ -17,21 +17,22 @@
 #define COMMAND_NAVIGATE                        0x02
 
 //constants
-int8_t ANGLE_SENSITIVITY = 10;
+#define ANGLE_SENSITIVITY           10
 
-uint8_t SPEED_DEFAULT = 125;
-uint8_t SPEED_FIND_LIGHT_DIRECTION = 100;
-uint8_t SPEED_TURN = 100;
+#define SPEED_DEFAULT               125
+#define SPEED_FIND_LIGHT_DIRECTION  100
+#define SPEED_TURN                  100
+#define SPEED_MINIMAL               100
 
-uint8_t DISTANCE_TOO_CLOSE = 20;
-uint8_t DISTANCE_OBSTACLE_DETECTED = 50;
+#define DISTANCE_TOO_CLOSE          20
+#define DISTANCE_OBSTACLE_DETECTED  50
 
-uint16_t DELAY_NANO = 100;
-uint16_t DELAY_MICRO = 500;
-uint16_t DELAY_DEFAULT = 1000;
+#define DELAY_NANO                  100
+#define DELAY_MICRO                 500
+#define DELAY_DEFAULT               1000
 
-uint8_t MINIMAL_SPEED = 50;
-float SMOOTHING_COEFFICIENT = 0.8;
+#define SMOOTHING_COEFFICIENT       0.8f
+#define PRECISION_RANDOM            100.0f
 
 //sensors
 MeUltrasonicSensor *us;  //PORT_10
@@ -66,6 +67,10 @@ void loop()
 {
   waitForCommand();
 }
+
+/**
+ * Commands processing section
+ */
 
 void waitForCommand() {
   Serial.println("Please enter command: "); //Prompt User for input
@@ -113,6 +118,9 @@ boolean processNewCommand() {
   }
 }
 
+/**
+ * Navigation
+ */
 boolean navigate() {
 
   do {
@@ -121,55 +129,23 @@ boolean navigate() {
 
     if (tiltAlert()) {
       
-      Serial.println("Tilt alert!!! ");
+      modeOnTilt();
       
-      BackwardAndTurnRight(SPEED_DEFAULT);
-      
-      do {
-        
-        readSensors();
-        
-        delay(DELAY_NANO);
-      } while (tiltAlert());
-      
-      delay(DELAY_MICRO);
     } else if (obstacleProximity < DISTANCE_TOO_CLOSE) {
 
-      Serial.print("Too close! Goind backward ");
-      Serial.println(obstacleProximity);
+      modeObstacleIsTooClose();
       
-      BackwardAndTurnRight(SPEED_DEFAULT);
-      
-      do {
-        
-        readSensors();
-        
-        delay(DELAY_NANO);
-      } while (obstacleProximity < DISTANCE_OBSTACLE_DETECTED);
-
-      delay(DELAY_MICRO);
     } else if (obstacleProximity < DISTANCE_OBSTACLE_DETECTED) {
       
-      Serial.print("Obstacle detected. Avoiding. ");
-      Serial.println(obstacleProximity);
-      
-      forwardWithTurn(SPEED_DEFAULT, 0.66);
+      modeAvoidObstacle();
       
     } else {
-//      Serial.print("Going forward ");
-//      Serial.println(obstacleProximity);
 
-      if (isStuck()) {
-        Backward(SPEED_DEFAULT);
-        delay(DELAY_DEFAULT*2);
-        BackwardAndTurnRight(SPEED_DEFAULT);
-        delay(DELAY_MICRO);
-      } else {
-        Forward(SPEED_DEFAULT);
-      }
+      modeContinueNavigation();
+
     }
 
-    delay(DELAY_MICRO);
+    delay(DELAY_NANO);
     
   } while (!hasNewCommand());
 
@@ -180,6 +156,137 @@ boolean navigate() {
   delay(DELAY_DEFAULT);
 }
 
+/**
+ * Critical angle or don't see the ground - move backward
+ */
+void modeOnTilt() {
+  Serial.print("Tilt alert!!! gyroX=");
+  Serial.print(gyroX);
+  Serial.print(" gyroY=");
+  Serial.print(gyroY);
+  Serial.print(" groundFlag=");
+  Serial.println(groundFlag);  
+  
+  moveWithTurn(-SPEED_DEFAULT, getRandomDirection()); 
+  
+  do {        
+    readSensors();
+    
+    delay(DELAY_NANO);
+    
+  } while (tiltAlert());
+  
+  delay(DELAY_MICRO);
+
+  resetStuckTimer();
+
+  Serial.print("Tilt alert is fixed gyroX=");
+  Serial.print(gyroX);
+  Serial.print(" gyroY=");
+  Serial.print(gyroY);
+  Serial.print(" groundFlag=");
+  Serial.println(groundFlag); 
+}
+
+/**
+ * Obstacle is too close, trying to find free direction
+ */
+void modeObstacleIsTooClose() {
+  Serial.print("Too close! turning ");
+  Serial.println(obstacleProximity);
+  
+  if (getRandomDirection() < 1) {
+    Right(SPEED_DEFAULT);
+  } else {
+    Left(SPEED_DEFAULT);
+  }
+  
+  do {
+    readSensors();
+    
+    delay(DELAY_NANO);
+    
+  } while (obstacleProximity < DISTANCE_OBSTACLE_DETECTED);
+
+  Serial.print("Found obstacle free direction ");
+  Serial.println(obstacleProximity);
+
+  delay(DELAY_MICRO);
+
+  resetStuckTimer();
+}
+
+/**
+ * Approaching obstacle, lets change direction
+ */
+void modeAvoidObstacle() {
+  Serial.print("Obstacle detected. Avoiding. ");
+  Serial.println(obstacleProximity);
+  
+  moveWithTurn(SPEED_DEFAULT, getRandomDirection());
+
+  do {
+    readSensors();
+    
+    delay(DELAY_NANO);
+
+    if (isStuck()) {
+      modeStuck();
+
+      return;
+    }
+
+    if (obstacleProximity < DISTANCE_TOO_CLOSE || tiltAlert()) {
+      return;
+    }
+    
+  } while (obstacleProximity < DISTANCE_OBSTACLE_DETECTED);
+
+  Serial.print("Found obstacle free direction ");
+  Serial.println(obstacleProximity);
+
+  delay(DELAY_MICRO);
+
+  resetStuckTimer();  
+}
+
+/**
+ * No obstacles detected - continue navigation
+ */
+void modeContinueNavigation() {
+  if (isStuck()) {
+
+    modeStuck();
+
+  } else {
+    
+    Forward(SPEED_DEFAULT);
+    
+  }  
+}
+
+/**
+ * it's stuck. Moving backward
+ */
+void modeStuck() {
+  Backward(SPEED_DEFAULT);
+  
+  delay(DELAY_DEFAULT);
+  
+  if (getRandomDirection() < 1) {
+    BackwardAndTurnRight(SPEED_DEFAULT);
+  } else {
+    BackwardAndTurnLeft(SPEED_DEFAULT);
+  }
+  
+  delay(DELAY_DEFAULT*2);
+
+  resetStuckTimer(); 
+}
+
+/**
+ * Turn to identify maximum light intensity
+ */
 boolean findLightDirection() {
 
   readSensors();
@@ -197,9 +304,9 @@ boolean findLightDirection() {
   Serial.println(lightLevel);
 
   if (lightBalance < 1) {
-    Right(SPEED_TURN);
+    Right(SPEED_DEFAULT);
   } else {
-    Left(SPEED_TURN);
+    Left(SPEED_DEFAULT);
   } 
   
   do {
@@ -226,9 +333,12 @@ boolean findLightDirection() {
 
   delay(DELAY_DEFAULT);
 
-  turnToAngle(SPEED_TURN, maxLightLevelDirection);
+  turnToAngle(SPEED_DEFAULT, maxLightLevelDirection);
 }
 
+/**
+ * Turn to angle
+ */
 boolean turnToAngle(uint8_t moveSpeed, int16_t angle) {
   angle = normalizeAngle(angle);
   int16_t currentAngle = gyro.getAngle(3);
@@ -263,24 +373,32 @@ boolean turnToAngle(uint8_t moveSpeed, int16_t angle) {
 /********* UTILITIES **************/
 
 /**
- * > 0 - goes forward
- * < 0 - goes backward
- * 0 - is not moving
- * abs > 1 - goes left
- * abs < 1 - goes right
+ * 1 - forward
+ * > 1 - goes left
+ * < 1 - goes right
  */
 float getMoveDirection() {
-  if (currentSpeedL == 0 || currentSpeedR == 0) {
-    return 0;
-  } else if (currentSpeedL < 0 && currentSpeedR > 0) {
+  if (currentSpeedL < 0 && currentSpeedR > 0) {
     return abs(currentSpeedL) / abs(currentSpeedR);
   } else if (currentSpeedL > 0 && currentSpeedR < 0) {
-    return -abs(currentSpeedR) / abs(currentSpeedL);
+    return abs(currentSpeedR) / abs(currentSpeedL);
   } else {
-    return 0;
+    return 1;
   }
 }
 
+float getRandomDirection() {
+  float r = random(1, PRECISION_RANDOM);
+  return r/(PRECISION_RANDOM/2);
+}
+
+float getOppositeDirection() {
+  return 1/getMoveDirection();
+}
+
+void resetStuckTimer() {
+  stuckStartedTimestamp = 0;
+}
 
 boolean isStuck() {
   
@@ -293,11 +411,11 @@ boolean isStuck() {
   currentMotorPowerL = Encoder_1.getCurPwm();
   currentMotorPowerR = Encoder_2.getCurPwm();
 
-  if (abs(currentMotorPowerL) < MINIMAL_SPEED && abs(currentMotorPowerR) < MINIMAL_SPEED) {
+  if (abs(currentMotorPowerL) < SPEED_MINIMAL && abs(currentMotorPowerR) < SPEED_MINIMAL) {
 
-  } else if (abs(currentMotorPowerL) > MINIMAL_SPEED && currentMotorPowerR < MINIMAL_SPEED) {
+  } else if (abs(currentMotorPowerL) > SPEED_MINIMAL && currentMotorPowerR < SPEED_MINIMAL) {
     result = ((float)currentSpeedL)/((float)currentMotorPowerL) < 0.5;
-  } else if (abs(currentMotorPowerR) > MINIMAL_SPEED && currentMotorPowerL < MINIMAL_SPEED) {
+  } else if (abs(currentMotorPowerR) > SPEED_MINIMAL && currentMotorPowerL < SPEED_MINIMAL) {
     result = ((float)currentSpeedR)/((float)currentMotorPowerR) < 0.5;
   } else {
     result = sqrt(((float)currentSpeedR)/((float)currentMotorPowerR) * ((float)currentSpeedL)/((float)currentMotorPowerL)) < 0.5;
@@ -311,11 +429,10 @@ boolean isStuck() {
     stuckStartedTimestamp = 0;
   }
 
-  result = result && stuckStartedTimestamp > 0 && (millis() > (stuckStartedTimestamp + DELAY_DEFAULT*3));
+  result = result && stuckStartedTimestamp > 0 && (millis() > (stuckStartedTimestamp + DELAY_DEFAULT));
 
   if (result) {
     Serial.print("Stuck! ");
-    Serial.print(getMoveDirection());
     Serial.print(" ");
     Serial.print(currentMotorPowerL);
     Serial.print("/");
@@ -331,7 +448,7 @@ boolean isStuck() {
 
 
 boolean tiltAlert() {
-  return abs(gyroX) > 10 || abs(gyroY) > 10 || groundFlag == 0;
+  return abs(gyroX) > 15 || abs(gyroY) > 15 || groundFlag == 0;
 }
 
 void readSensors() {
@@ -343,6 +460,8 @@ void readSensors() {
   groundFlag = line.readSensors();
   lightLevelLeft = lightsensor_12.read(); //light left
   lightLevelRight = lightsensor_11.read(); //light right
+
+  //Serial.println(obstacleProximity);
 }
 
 
@@ -393,15 +512,19 @@ void Stop(void)
   Encoder_2.setMotorPwm(0);
 }
 
-void forwardWithTurn(double moveSpeed, double turnK)
+void moveWithTurn(double moveSpeed, double _direction)
 {
-  if (turnK > 1) {
-    moveSpeed = moveSpeed/turnK;
-  } else {
-    moveSpeed = moveSpeed*turnK;
+  if (_direction == 0) {
+    _direction = 1;
   }
-  Encoder_1.setMotorPwm(-moveSpeed*turnK);
-  Encoder_2.setMotorPwm(moveSpeed/turnK);
+  
+  if (_direction > 1) {
+    moveSpeed = moveSpeed/_direction;
+  } else {
+    moveSpeed = moveSpeed*_direction;
+  }
+  Encoder_1.setMotorPwm(-moveSpeed*_direction);
+  Encoder_2.setMotorPwm(moveSpeed/_direction);
 }
 
 void Left(uint8_t moveSpeed)
