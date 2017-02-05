@@ -19,13 +19,14 @@
 //constants
 #define ANGLE_SENSITIVITY           10
 
-#define SPEED_DEFAULT               125
-#define SPEED_FIND_LIGHT_DIRECTION  100
-#define SPEED_TURN                  100
-#define SPEED_MINIMAL               100
+#define SPEED_DEFAULT               100
+#define SPEED_FIND_LIGHT_DIRECTION  75
+#define SPEED_TURN                  75
+#define SPEED_MINIMAL               75
 
 #define DISTANCE_TOO_CLOSE          20
 #define DISTANCE_OBSTACLE_DETECTED  50
+#define DISTANCE_SENSITIVITY        2
 
 #define DELAY_NANO                  100
 #define DELAY_MICRO                 500
@@ -45,17 +46,10 @@ MeBuzzer buzzer;
 MeLightSensor lightsensor_12(12);
 MeLightSensor lightsensor_11(11);
 
-//sensors output
-float  gyroY, gyroX, gyroZ;
-uint16_t obstacleProximity=0;
-uint8_t groundFlag=0;
-uint16_t lightLevelLeft = 0;
-uint16_t lightLevelRight = 0;
-int16_t currentSpeedL = 0;
-int16_t currentSpeedR = 0;
-int16_t currentMotorPowerL = 0;
-int16_t currentMotorPowerR = 0;
-long stuckStartedTimestamp = 0;
+//variables
+long wheelStuckTime = 0;
+long distanceStuckTime = 0;
+uint16_t previousObstacleProximity = 0;
 
 //TODO: detect stuck state
 //TODO: conditional turn (depends on what track is stuck)
@@ -111,7 +105,6 @@ boolean processNewCommand() {
       if (command >= SPEED_TURN) {
         Forward(command);
         do {
-          isStuck();
           delay(DELAY_MICRO);
         } while (!hasNewCommand());
       }
@@ -124,8 +117,8 @@ boolean processNewCommand() {
 boolean navigate() {
 
   do {
-    
-    readSensors();
+
+    uint16_t obstacleProximity = getObstacleProximity();
 
     if (tiltAlert()) {
       
@@ -161,48 +154,74 @@ boolean navigate() {
  */
 void modeOnTilt() {
   Serial.print("Tilt alert!!! gyroX=");
-  Serial.print(gyroX);
+  Serial.print(getGyroX());
   Serial.print(" gyroY=");
-  Serial.print(gyroY);
+  Serial.print(getGyroY());
   Serial.print(" groundFlag=");
-  Serial.println(groundFlag);  
+  Serial.println(getGroundFlag());  
+
+  Backward(SPEED_DEFAULT);
   
-  moveWithTurn(-SPEED_DEFAULT, getRandomDirection()); 
+  delay(DELAY_DEFAULT);
+
+  if (getRandomDirection() < 1) {
+    BackwardAndTurnRight(SPEED_DEFAULT);
+  } else {
+    BackwardAndTurnLeft(SPEED_DEFAULT);
+  }  
   
-  do {        
-    readSensors();
-    
+  do {     
+       
     delay(DELAY_NANO);
+
+    if (hasNewCommand()) {
+      break;
+    }
     
   } while (tiltAlert());
   
-  delay(DELAY_MICRO);
+  delay(DELAY_DEFAULT);
 
   resetStuckTimer();
 
   Serial.print("Tilt alert is fixed gyroX=");
-  Serial.print(gyroX);
+  Serial.print(getGyroX());
   Serial.print(" gyroY=");
-  Serial.print(gyroY);
+  Serial.print(getGyroY());
   Serial.print(" groundFlag=");
-  Serial.println(groundFlag); 
+  Serial.println(getGroundFlag()); 
 }
 
 /**
  * Obstacle is too close, trying to find free direction
  */
 void modeObstacleIsTooClose() {
+  uint16_t obstacleProximity = getObstacleProximity();
+  
   Serial.print("Too close! turning ");
   Serial.println(obstacleProximity);
+
+  Backward(SPEED_DEFAULT);
+  
+  delay(DELAY_DEFAULT);
   
   if (getRandomDirection() < 1) {
     Right(SPEED_DEFAULT);
   } else {
     Left(SPEED_DEFAULT);
   }
-  
+ 
   do {
-    readSensors();
+    obstacleProximity = getObstacleProximity();
+
+    if (distanceIsNotChanging()) {
+      modeStuck();
+      return;
+    }
+
+    if (hasNewCommand()) {
+      break;
+    }
     
     delay(DELAY_NANO);
     
@@ -220,24 +239,29 @@ void modeObstacleIsTooClose() {
  * Approaching obstacle, lets change direction
  */
 void modeAvoidObstacle() {
+  uint16_t obstacleProximity = getObstacleProximity();
+  
   Serial.print("Obstacle detected. Avoiding. ");
   Serial.println(obstacleProximity);
   
   moveWithTurn(SPEED_DEFAULT, getRandomDirection());
 
   do {
-    readSensors();
+    obstacleProximity = getObstacleProximity();
     
     delay(DELAY_NANO);
 
-    if (isStuck()) {
+    if (areWheelsStuck() || distanceIsNotChanging()) {
       modeStuck();
-
       return;
     }
 
     if (obstacleProximity < DISTANCE_TOO_CLOSE || tiltAlert()) {
       return;
+    }
+
+    if (hasNewCommand()) {
+      break;
     }
     
   } while (obstacleProximity < DISTANCE_OBSTACLE_DETECTED);
@@ -254,14 +278,13 @@ void modeAvoidObstacle() {
  * No obstacles detected - continue navigation
  */
 void modeContinueNavigation() {
-  if (isStuck()) {
+  if (areWheelsStuck() || distanceIsNotChanging()) {
 
     modeStuck();
 
   } else {
     
     Forward(SPEED_DEFAULT);
-    
   }  
 }
 
@@ -289,12 +312,11 @@ void modeStuck() {
  */
 boolean findLightDirection() {
 
-  readSensors();
-
   uint16_t lightLevel = getLightLevel();
   uint16_t maxLightLevel = lightLevel;
+  int16_t gyroZ = getGyroZ();
   int16_t maxLightLevelDirection = gyroZ;
-  float currentDirection = gyroZ;
+  int16_t currentDirection = maxLightLevelDirection;
   float lightBalance = getLightBalance();
   float dAngle = 0;
 
@@ -310,16 +332,20 @@ boolean findLightDirection() {
   } 
   
   do {
-      readSensors();
       lightLevel = getLightLevel();
+      gyroZ = getGyroZ();
       
-      if (maxLightLevel < getLightLevel()) {
-        maxLightLevel = getLightLevel();
+      if (maxLightLevel < lightLevel) {
+        maxLightLevel = lightLevel;
         maxLightLevelDirection = gyroZ;
       }
 
       dAngle += abs(normalizeAngle(currentDirection - gyroZ));
       currentDirection = gyroZ;
+
+      if (hasNewCommand()) {
+        break;
+      }
 
       delay(DELAY_NANO);
   } while (dAngle < 360);
@@ -341,7 +367,7 @@ boolean findLightDirection() {
  */
 boolean turnToAngle(uint8_t moveSpeed, int16_t angle) {
   angle = normalizeAngle(angle);
-  int16_t currentAngle = gyro.getAngle(3);
+  int16_t currentAngle = getGyroZ();
 
   Serial.print("Started turn. angle=");
   Serial.print(angle);
@@ -355,7 +381,12 @@ boolean turnToAngle(uint8_t moveSpeed, int16_t angle) {
   }
   
   do {
-    currentAngle = gyro.getAngle(3);
+    currentAngle = getGyroZ();
+
+    if (hasNewCommand()) {
+      break;
+    }
+    
   } while(!equalsWithinRange(angle, currentAngle, ANGLE_SENSITIVITY));
   
   Stop();
@@ -370,106 +401,48 @@ boolean turnToAngle(uint8_t moveSpeed, int16_t angle) {
   return true;
 }
 
-/********* UTILITIES **************/
-
-/**
- * 1 - forward
- * > 1 - goes left
- * < 1 - goes right
- */
-float getMoveDirection() {
-  if (currentSpeedL < 0 && currentSpeedR > 0) {
-    return abs(currentSpeedL) / abs(currentSpeedR);
-  } else if (currentSpeedL > 0 && currentSpeedR < 0) {
-    return abs(currentSpeedR) / abs(currentSpeedL);
-  } else {
-    return 1;
-  }
-}
-
-float getRandomDirection() {
-  float r = random(1, PRECISION_RANDOM);
-  return r/(PRECISION_RANDOM/2);
-}
-
-float getOppositeDirection() {
-  return 1/getMoveDirection();
-}
-
-void resetStuckTimer() {
-  stuckStartedTimestamp = 0;
-}
-
-boolean isStuck() {
-  
-  boolean result = false;
-
-  Encoder_1.updateSpeed();
-  Encoder_2.updateSpeed();
-  currentSpeedL = Encoder_1.getCurrentSpeed();
-  currentSpeedR = Encoder_2.getCurrentSpeed();  
-  currentMotorPowerL = Encoder_1.getCurPwm();
-  currentMotorPowerR = Encoder_2.getCurPwm();
-
-  if (abs(currentMotorPowerL) < SPEED_MINIMAL && abs(currentMotorPowerR) < SPEED_MINIMAL) {
-
-  } else if (abs(currentMotorPowerL) > SPEED_MINIMAL && currentMotorPowerR < SPEED_MINIMAL) {
-    result = ((float)currentSpeedL)/((float)currentMotorPowerL) < 0.5;
-  } else if (abs(currentMotorPowerR) > SPEED_MINIMAL && currentMotorPowerL < SPEED_MINIMAL) {
-    result = ((float)currentSpeedR)/((float)currentMotorPowerR) < 0.5;
-  } else {
-    result = sqrt(((float)currentSpeedR)/((float)currentMotorPowerR) * ((float)currentSpeedL)/((float)currentMotorPowerL)) < 0.5;
-  }
-
-  if (result) {
-    if (stuckStartedTimestamp == 0) {
-      stuckStartedTimestamp = millis();
-    }
-  } else {
-    stuckStartedTimestamp = 0;
-  }
-
-  result = result && stuckStartedTimestamp > 0 && (millis() > (stuckStartedTimestamp + DELAY_DEFAULT));
-
-  if (result) {
-    Serial.print("Stuck! ");
-    Serial.print(" ");
-    Serial.print(currentMotorPowerL);
-    Serial.print("/");
-    Serial.print(currentSpeedL);
-    Serial.print(" ");
-    Serial.print(currentMotorPowerR);
-    Serial.print("/");
-    Serial.println(currentSpeedR);
-  }
-
-  return result;
-}
-
+/********* SENSORS **************/
 
 boolean tiltAlert() {
-  return abs(gyroX) > 15 || abs(gyroY) > 15 || groundFlag == 0;
+  return abs(getGyroX()) > 15 || abs(getGyroY()) > 15 || getGroundFlag() == 0;
 }
 
-void readSensors() {
-  //reading sensors
-  gyroX = gyro.getAngle(1); //vertical axis
-  gyroY = gyro.getAngle(2); //horizontal axis
-  gyroZ = gyro.getAngle(3); //direction
-  obstacleProximity = us->distanceCm(); //distance to front obstacle
-  groundFlag = line.readSensors();
-  lightLevelLeft = lightsensor_12.read(); //light left
-  lightLevelRight = lightsensor_11.read(); //light right
-
-  //Serial.println(obstacleProximity);
+float getGyroX() {
+  return gyro.getAngle(1); //vertical axis
 }
 
+float getGyroY() {
+  return gyro.getAngle(2); //horizontal axis
+}
+
+float getGyroZ() {
+  return gyro.getAngle(3); //direction
+}
+
+uint16_t getObstacleProximity() {
+  return us->distanceCm();
+}
+
+uint8_t getGroundFlag() {
+  return line.readSensors();
+}
+
+uint16_t getLightLevelLeft() {
+  return lightsensor_12.read(); //light left
+}
+
+uint16_t getLightLevelRight() {
+  return lightsensor_11.read(); //light right
+}
 
 /**
  * > 1 - more light from left
  * < 1 - more light from right
  */
 float getLightBalance() {
+  uint16_t lightLevelLeft = getLightLevelLeft();
+  uint16_t lightLevelRight = getLightLevelRight();
+  
   if (lightLevelRight == lightLevelLeft) {
     return 1;
   } else if(lightLevelRight == 0) {
@@ -481,7 +454,7 @@ float getLightBalance() {
 }
 
 float getLightLevel() {
-  return sqrt(lightLevelLeft*lightLevelRight);
+  return sqrt(getLightLevelLeft()*getLightLevelRight());
 }
 
 /**
@@ -495,6 +468,93 @@ float normalizeAngle(float angle) {
   }
 
   return angle;
+}
+
+/********* UTILITIES **************/
+
+float getRandomDirection() {
+  float r = random(1, PRECISION_RANDOM);
+  return r/(PRECISION_RANDOM/2);
+}
+
+void resetStuckTimer() {
+  wheelStuckTime = 0;
+}
+
+boolean distanceIsNotChanging() {
+  boolean result = false;
+
+  uint16_t obstacleProximity = getObstacleProximity();
+
+  result = equalsWithinRange(obstacleProximity, previousObstacleProximity, DISTANCE_SENSITIVITY);
+
+  previousObstacleProximity = obstacleProximity;
+
+  if (result && obstacleProximity < 400) {
+    if (distanceStuckTime == 0) {
+      distanceStuckTime = millis();
+    }
+  } else {
+    distanceStuckTime = 0;
+  }
+
+  result = result && distanceStuckTime > 0 && (millis() > (distanceStuckTime + DELAY_DEFAULT*2));
+
+  if (result) {
+    Serial.print("Stuck (distance)! ");
+    Serial.print(" previousObstacleProximity=");
+    Serial.print(previousObstacleProximity);
+    Serial.print(" obstacleProximity=");
+    Serial.println(obstacleProximity);
+  }
+
+  return result;
+}
+
+boolean areWheelsStuck() {
+  
+  boolean result = false;
+
+  Encoder_1.updateSpeed();
+  Encoder_2.updateSpeed();
+  int16_t currentSpeedL = Encoder_1.getCurrentSpeed();
+  int16_t currentSpeedR = Encoder_2.getCurrentSpeed();  
+  int16_t currentMotorPowerL = Encoder_1.getCurPwm();
+  int16_t currentMotorPowerR = Encoder_2.getCurPwm();
+
+  if (abs(currentMotorPowerL) < SPEED_MINIMAL && abs(currentMotorPowerR) < SPEED_MINIMAL) {
+
+  } else if (abs(currentMotorPowerL) > SPEED_MINIMAL && currentMotorPowerR < SPEED_MINIMAL) {
+    result = ((float)currentSpeedL)/((float)currentMotorPowerL) < 0.5;
+  } else if (abs(currentMotorPowerR) > SPEED_MINIMAL && currentMotorPowerL < SPEED_MINIMAL) {
+    result = ((float)currentSpeedR)/((float)currentMotorPowerR) < 0.5;
+  } else {
+    result = sqrt(((float)currentSpeedR)/((float)currentMotorPowerR) * ((float)currentSpeedL)/((float)currentMotorPowerL)) < 0.5;
+  }
+
+  if (result) {
+    if (wheelStuckTime == 0) {
+      wheelStuckTime = millis();
+    }
+  } else {
+    wheelStuckTime = 0;
+  }
+
+  result = result && wheelStuckTime > 0 && (millis() > (wheelStuckTime + DELAY_DEFAULT));
+
+  if (result) {
+    Serial.print("Stuck! (wheels) ");
+    Serial.print(" ");
+    Serial.print(currentMotorPowerL);
+    Serial.print("/");
+    Serial.print(currentSpeedL);
+    Serial.print(" ");
+    Serial.print(currentMotorPowerR);
+    Serial.print("/");
+    Serial.println(currentSpeedR);
+  }
+
+  return result;
 }
 
 /**
