@@ -14,7 +14,7 @@ var routes = [
   'http://192.168.31.45:3001'
 ];
 
-var proxy = httpProxy.createServer({});
+var proxy = httpProxy.createProxyServer({});
 
 var proxyServer = http.createServer(function (req, res) {
   var route=0;
@@ -28,8 +28,6 @@ proxyServer.on('upgrade', function (req, socket, head) {
   proxy.ws(req, socket, head, {target: routes[1]});
 });
 proxyServer.listen(8080,"127.0.0.1");
-proxyServer.listen(8080,"localhost");
-proxyServer.listen(8080,"192.168.31.45");
 
 /**
  * Get port from environment and store in Express.
