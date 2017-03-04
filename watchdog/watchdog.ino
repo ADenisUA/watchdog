@@ -17,7 +17,7 @@
 #define COMMAND_NAVIGATE                        0x02
 
 //constants
-#define ANGLE_SENSITIVITY           10
+#define ANGLE_SENSITIVITY           5
 
 #define SPEED_DEFAULT               100
 #define SPEED_FIND_LIGHT_DIRECTION  75
@@ -34,6 +34,7 @@
 
 #define SMOOTHING_COEFFICIENT       0.8f
 #define PRECISION_RANDOM            100.0f
+#define RATIO_WHEELS_STUCK          0.33f
 
 //sensors
 MeUltrasonicSensor *us;  //PORT_10
@@ -162,7 +163,7 @@ void modeOnTilt() {
 
   Backward(SPEED_DEFAULT);
   
-  delay(DELAY_DEFAULT);
+  delay(DELAY_MICRO);
 
   if (getRandomDirection() < 1) {
     BackwardAndTurnRight(SPEED_DEFAULT);
@@ -203,7 +204,7 @@ void modeObstacleIsTooClose() {
 
   Backward(SPEED_DEFAULT);
   
-  delay(DELAY_DEFAULT);
+  delay(DELAY_MICRO);
   
   if (getRandomDirection() < 1) {
     Right(SPEED_DEFAULT);
@@ -244,7 +245,13 @@ void modeAvoidObstacle() {
   Serial.print("Obstacle detected. Avoiding. ");
   Serial.println(obstacleProximity);
   
-  moveWithTurn(SPEED_DEFAULT, getRandomDirection());
+  //moveWithTurn(SPEED_DEFAULT, getRandomDirection());
+
+  if (getRandomDirection() < 1) {
+    TurnRight(SPEED_DEFAULT);
+  } else {
+    TurnLeft(SPEED_DEFAULT);
+  }
 
   do {
     obstacleProximity = getObstacleProximity();
@@ -525,11 +532,11 @@ boolean areWheelsStuck() {
   if (abs(currentMotorPowerL) < SPEED_MINIMAL && abs(currentMotorPowerR) < SPEED_MINIMAL) {
 
   } else if (abs(currentMotorPowerL) > SPEED_MINIMAL && currentMotorPowerR < SPEED_MINIMAL) {
-    result = ((float)currentSpeedL)/((float)currentMotorPowerL) < 0.5;
+    result = ((float)currentSpeedL)/((float)currentMotorPowerL) < RATIO_WHEELS_STUCK;
   } else if (abs(currentMotorPowerR) > SPEED_MINIMAL && currentMotorPowerL < SPEED_MINIMAL) {
-    result = ((float)currentSpeedR)/((float)currentMotorPowerR) < 0.5;
+    result = ((float)currentSpeedR)/((float)currentMotorPowerR) < RATIO_WHEELS_STUCK;
   } else {
-    result = sqrt(((float)currentSpeedR)/((float)currentMotorPowerR) * ((float)currentSpeedL)/((float)currentMotorPowerL)) < 0.5;
+    result = sqrt(((float)currentSpeedR)/((float)currentMotorPowerR) * ((float)currentSpeedL)/((float)currentMotorPowerL)) < RATIO_WHEELS_STUCK;
   }
 
   if (result) {
