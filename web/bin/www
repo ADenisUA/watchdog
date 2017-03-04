@@ -14,7 +14,7 @@ var routes = [
   'http://192.168.31.45:3001'
 ];
 
-var proxy = new httpProxy.createProxyServer({});
+var proxy = new httpProxy.createServer({});
 
 var proxyServer = http.createServer(function (req, res) {
   var route=0;
