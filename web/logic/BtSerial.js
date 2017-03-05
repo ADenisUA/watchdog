@@ -36,6 +36,8 @@ var BtSerial = module.exports = function BtSerial() {
                     if (channel < 0) {
                         _address = null;
                         console.warn("Chanell is " + channel + " retrying");
+                        _this.connect(_callback);
+                        return;
                     }
 
                     // make bluetooth connect to remote device
@@ -44,6 +46,7 @@ var BtSerial = module.exports = function BtSerial() {
                         if (error) {
                             console.log('Unable to connect ', error);
                             _this.connect(_callback);
+                            return;
                         } else {
                             console.log('Connected to ', name);
                             _connection = connection;
