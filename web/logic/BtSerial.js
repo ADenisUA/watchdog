@@ -33,6 +33,11 @@ var BtSerial = module.exports = function BtSerial() {
                 device.findSerialPortChannel(address, function (channel) {
                     console.log('Found RFCOMM channel for serial port on %s: ', name, channel);
 
+                    if (channel < 0) {
+                        _address = null;
+                        console.warn("Chanell is " + channel + " retrying");
+                    }
+
                     // make bluetooth connect to remote device
                     bluetooth.connect(address, channel, function (error, connection) {
 
