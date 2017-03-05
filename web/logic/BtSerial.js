@@ -2,9 +2,16 @@
 
 var BtSerial = module.exports = function BtSerial() {
     var _connection = null;
+    var _name = null;
     var _this = this;
 
     this.connect = function(callback) {
+
+        if (_connection != null) {
+            if (callback) callback(_name);
+            return;
+        }
+
         const bluetooth = require('node-bluetooth');
         const device = new bluetooth.DeviceINQ();
 
@@ -12,6 +19,11 @@ var BtSerial = module.exports = function BtSerial() {
             .on('finished',  console.log.bind(console, 'finished'))
             .on('found', function found(address, name){
                 console.log('Found: ' + address + ' with name ' + name);
+
+                if (_connection != null) {
+                    if (callback) callback(_name);
+                    return;
+                }
 
                 if (name.indexOf("Makeblock") > -1) {
                     device.findSerialPortChannel(address, function (channel) {
@@ -26,6 +38,7 @@ var BtSerial = module.exports = function BtSerial() {
                             }
 
                             _connection = connection;
+                            _name = name;
 
                             console.log('Connected ', result);
 
@@ -43,6 +56,7 @@ var BtSerial = module.exports = function BtSerial() {
 
     this.write = function(content, callback) {
         if (!_connection) {
+            console.log("connection is null. re-connection");
             _this.connect(function () {
                 _connection.write(new Buffer(content, 'utf-8'), callback);
             });

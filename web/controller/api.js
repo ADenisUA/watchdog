@@ -18,9 +18,11 @@ router.get('/connect', function(request, response) {
 router.get('/write', function(request, response) {
     var content = request.param("content");
 
+    console.log("attempting to write: "+ content);
     btSerial.write(content, function (result) {
         //response.status(404).json({status: "error"});
-        response.status(200);
+        console.log("written: "+ content);
+        response.status(200).json({status: "ok"});
     });
 });
 

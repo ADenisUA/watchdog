@@ -12,9 +12,9 @@
 #define BUZZER_PORT                          45
 #define RGBLED_PORT                          44
 
-#define COMMAND_STOP                            0x00
-#define COMMAND_FIND_LIGHT                      0x01
-#define COMMAND_NAVIGATE                        0x02
+//#define COMMAND_STOP                            0x00
+//#define COMMAND_FIND_LIGHT                      0x01
+//#define COMMAND_NAVIGATE                        0x02
 
 //constants
 #define ANGLE_SENSITIVITY           5
@@ -31,6 +31,7 @@
 #define DELAY_NANO                  100
 #define DELAY_MICRO                 500
 #define DELAY_DEFAULT               1000
+#define DELAY_MACRO                 10000
 
 #define SMOOTHING_COEFFICIENT       0.8f
 #define PRECISION_RANDOM            100.0f
@@ -50,6 +51,7 @@ MeLightSensor lightsensor_11(11);
 //variables
 long wheelStuckTime = 0;
 long distanceStuckTime = 0;
+long lastCommandTimeStamp = 0;
 uint16_t previousObstacleProximity = 0;
 
 //TODO: detect stuck state
@@ -69,17 +71,13 @@ void loop()
 
 void waitForCommand() {
   Serial.println("Please enter command: "); //Prompt User for input
-  Serial.println("0 - stop");
-  Serial.println("1 - find light direction");
-  Serial.println("2 - navigate");
+  Serial.println("findLightDirection, navigate, stop, forward, backward, left, right, backwardRight, backwardLeft, forwardRight, forwardLeft");
   
   while (!hasNewCommand()) {
     //Wait for user input
   }
 
   processNewCommand();
-
-  delay(DELAY_DEFAULT);
 }
 
 boolean hasNewCommand() {
@@ -87,35 +85,59 @@ boolean hasNewCommand() {
 }
 
 boolean processNewCommand() {
-  int command = Serial.parseInt();
+  String command = Serial.readString();
   
   Serial.print("Received command: ");
   Serial.println(command);
+  lastCommandTimeStamp = millis();
 
-  switch(command) {
-    case COMMAND_FIND_LIGHT:
-      findLightDirection();
-      break;
-    case COMMAND_NAVIGATE:
-      navigate();
-      break;
-    case COMMAND_STOP:
-      Stop();
-      break;
-    default:
-      if (command >= SPEED_TURN) {
-        Forward(command);
-        do {
-          delay(DELAY_MICRO);
-        } while (!hasNewCommand());
-      }
+  if (command.startsWith("findLightDirection")) {
+    commandFindLightDirection();
+  } else if (command.startsWith("navigate")) {
+    commandNavigate();
+  } else if (command.startsWith("stop")) {
+    Stop();
+  } else if (command.startsWith("forward")) {
+    Forward(SPEED_DEFAULT);
+    executeAndStopUntilNewCommandWithDelay();
+  } else if (command.startsWith("backward")) {
+    Backward(SPEED_DEFAULT);
+    executeAndStopUntilNewCommandWithDelay();
+  } else if (command.startsWith("left")) {
+    Left(SPEED_DEFAULT);
+    executeAndStopUntilNewCommandWithDelay();
+  } else if (command.startsWith("right")) {
+    Right(SPEED_DEFAULT);
+    executeAndStopUntilNewCommandWithDelay();
+  } else if (command.startsWith("backwardRight")) {
+    BackwardAndTurnRight(SPEED_DEFAULT);
+    executeAndStopUntilNewCommandWithDelay();
+  } else if (command.startsWith("backwardLeft")) {
+    BackwardAndTurnLeft(SPEED_DEFAULT);
+    executeAndStopUntilNewCommandWithDelay();
+  } else if (command.startsWith("forwardRight")) {
+    TurnRight(SPEED_DEFAULT);
+    executeAndStopUntilNewCommandWithDelay();
+  } else if (command.startsWith("forwardLeft")) {
+    TurnLeft(SPEED_DEFAULT);
+    executeAndStopUntilNewCommandWithDelay();
   }
+}
+
+void executeAndStopUntilNewCommandWithDelay() {
+    do {
+      if (millis() > lastCommandTimeStamp + DELAY_MACRO) {
+        Stop(); //we hit delay
+        return;
+      }
+      delay(DELAY_NANO);
+    } while (!hasNewCommand());  
 }
 
 /**
  * Navigation
  */
-boolean navigate() {
+boolean commandNavigate() {
 
   do {
 
@@ -317,7 +339,7 @@ void modeStuck() {
 /**
  * Turn to identify maximum light intensity
  */
-boolean findLightDirection() {
+boolean commandFindLightDirection() {
 
   uint16_t lightLevel = getLightLevel();
   uint16_t maxLightLevel = lightLevel;
@@ -569,6 +591,28 @@ boolean areWheelsStuck() {
  */
 boolean equalsWithinRange(double value1, double value2, double range) {
   return (value1 < value2+range) && (value1 > value2-range);
+}
+
+// splitting a string and return the part nr index split by separator
+String getStringSegmentByIndex(String data, char separator, int index) {
+    int stringData = 0;        //variable to count data part nr 
+    String dataPart = "";      //variable to hole the return text
+
+    for(int i = 0; i<data.length()-1; i++) {    //Walk through the text one letter at a time
+        if(data[i]==separator) {
+            //Count the number of times separator character appears in the text
+            stringData++;
+        } else if(stringData==index) {
+            //get the text when separator is the rignt one
+            dataPart.concat(data[i]);
+        } else if(stringData>index) {
+            //return text and stop if the next separator appears - to save CPU-time
+            return dataPart;
+            break;
+        }
+    }
+    //return text if this is the last part
+    return dataPart;
 }
 
 /********* MOVEMENT RELATED **********/
