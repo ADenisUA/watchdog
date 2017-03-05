@@ -97,18 +97,6 @@ boolean processNewCommand() {
     commandNavigate();
   } else if (command.startsWith("stop")) {
     Stop();
-  } else if (command.startsWith("forward")) {
-    Forward(SPEED_DEFAULT);
-    executeAndStopUntilNewCommandWithDelay();
-  } else if (command.startsWith("backward")) {
-    Backward(SPEED_DEFAULT);
-    executeAndStopUntilNewCommandWithDelay();
-  } else if (command.startsWith("left")) {
-    Left(SPEED_DEFAULT);
-    executeAndStopUntilNewCommandWithDelay();
-  } else if (command.startsWith("right")) {
-    Right(SPEED_DEFAULT);
-    executeAndStopUntilNewCommandWithDelay();
   } else if (command.startsWith("backwardRight")) {
     BackwardAndTurnRight(SPEED_DEFAULT);
     executeAndStopUntilNewCommandWithDelay();
@@ -121,6 +109,18 @@ boolean processNewCommand() {
   } else if (command.startsWith("forwardLeft")) {
     TurnLeft(SPEED_DEFAULT);
     executeAndStopUntilNewCommandWithDelay();
+  } else if (command.startsWith("forward")) {
+    Forward(SPEED_DEFAULT);
+    executeAndStopUntilNewCommandWithDelay();
+  } else if (command.startsWith("backward")) {
+    Backward(SPEED_DEFAULT);
+    executeAndStopUntilNewCommandWithDelay();
+  } else if (command.startsWith("left")) {
+    Left(SPEED_DEFAULT);
+    executeAndStopUntilNewCommandWithDelay();
+  } else if (command.startsWith("right")) {
+    Right(SPEED_DEFAULT);
+    executeAndStopUntilNewCommandWithDelay();
   }
 }
 
@@ -130,7 +130,6 @@ void executeAndStopUntilNewCommandWithDelay() {
         Stop(); //we hit delay
         return;
       }
-      delay(DELAY_NANO);
     } while (!hasNewCommand());  
 }
 

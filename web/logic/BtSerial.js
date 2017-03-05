@@ -1,53 +1,64 @@
 "use strict";
 
+const bluetooth = require('node-bluetooth');
+
+
 var BtSerial = module.exports = function BtSerial() {
     var _connection = null;
-    var _name = null;
     var _this = this;
+    var _callback = null;
+    var _address = null;
+    const device = new bluetooth.DeviceINQ();
+
+    device
+        .on('finished',  function() {
+            console.log('Completed discovery');
+
+            if (_address == null) {
+                console.warn('Unable to find device. Retrying');
+                _this.connect(_callback);
+            }
+        })
+        .on('found', function found(address, name){
+            console.log('Discovered device ' + name);
+
+            if (_connection != null) {
+                if (_callback) _callback();
+                return;
+            }
+
+            if (name.indexOf("Makeblock") > -1) {
+                _address = address;
+
+                device.findSerialPortChannel(address, function (channel) {
+                    console.log('Found RFCOMM channel for serial port on %s: ', name, channel);
+
+                    // make bluetooth connect to remote device
+                    bluetooth.connect(address, channel, function (error, connection) {
+
+                        if (error) {
+                            console.log('Unable to connect ', error);
+                            _this.connect(_callback);
+                        } else {
+                            console.log('Connected to ', name);
+                            _connection = connection;
+                            if (_callback) _callback();
+                        }
+                    });
+
+                });
+            }
+        });
 
     this.connect = function(callback) {
+        _callback = callback;
 
         if (_connection != null) {
-            if (callback) callback(_name);
+            if (_callback) _callback(_name);
             return;
         }
 
-        const bluetooth = require('node-bluetooth');
-        const device = new bluetooth.DeviceINQ();
-
-        device
-            .on('finished',  console.log.bind(console, 'finished'))
-            .on('found', function found(address, name){
-                console.log('Found: ' + address + ' with name ' + name);
-
-                if (_connection != null) {
-                    if (callback) callback(_name);
-                    return;
-                }
-
-                if (name.indexOf("Makeblock") > -1) {
-                    device.findSerialPortChannel(address, function (channel) {
-                        console.log('Found RFCOMM channel for serial port on %s: ', name, channel);
-
-                        // make bluetooth connect to remote device
-                        bluetooth.connect(address, channel, function (error, connection) {
-
-                            var result = name;
-                            if (error) {
-                                result = error;
-                            }
-
-                            _connection = connection;
-                            _name = name;
-
-                            console.log('Connected ', result);
-
-                            if (callback) callback(result);
-                        });
-
-                    });
-                }
-            }).inquire();
+        device.inquire();
     };
 
     this.getConnection = function() {

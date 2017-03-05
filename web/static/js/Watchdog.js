@@ -2,15 +2,15 @@
 
 let instance;
 
-class Watchdow {
+class Watchdog {
 
     constructor() {
-        console.log("Watchdow started");
+        console.log("Watchdog started");
     }
 
     static getInstance() {
         if (!instance) {
-            instance = new Watchdow();
+            instance = new Watchdog();
         }
         return instance;
     }
@@ -98,4 +98,4 @@ class Utils {
     }
 }
 
-//console.log(Watchdow.getInstance());
+//console.log(Watchdog.getInstance());
