@@ -11,24 +11,24 @@ var BtSerial = module.exports = function BtSerial() {
     const device = new bluetooth.DeviceINQ();
     const DEVICE_NAME = "Makeblock";
 
-    // device
-    //     .on('finished',  function() {
-    //         console.log('Completed discovery');
-    //
-    //         if (_address == null) {
-    //             console.warn('Unable to find device. Retrying');
-    //             _this.connect(_callback);
-    //         }
-    //     })
-    //     .on('found', function found(address, name){
-    //         console.log('Discovered device ' + name + ' ' + address);
-    //
-    //         if (_connection == null) {
-    //             _connect(name, address);
-    //         }
-    //
-    //
-    //     });
+    device
+        .on('finished',  function() {
+            console.log('Completed discovery');
+
+            if (_address == null) {
+                console.warn('Unable to find device. Retrying');
+                _this.connect(_callback);
+            }
+        })
+        .on('found', function found(address, name){
+            console.log('Discovered device ' + name + ' ' + address);
+
+            if (_connection == null) {
+                _connect(name, address);
+            }
+
+
+        });
 
     this.connect = function(callback) {
         _callback = callback;
@@ -47,11 +47,13 @@ var BtSerial = module.exports = function BtSerial() {
                 var _device = devices[i];
                 if (_device && _device.name) {
                     console.log(_device.name, _device.address);
-                    _connect(_device.name, _device.address);
+                    if (_connect(_device.name, _device.address)) {
+                        return;
+                    }
                 }
             }
+            device.inquire();
         });
-        //device.inquire();
     };
 
     var _connect = function(name, address) {
@@ -83,7 +85,9 @@ var BtSerial = module.exports = function BtSerial() {
                 });
 
             });
+            return true;
         }
+        return false;
     }
 
     this.getConnection = function() {
