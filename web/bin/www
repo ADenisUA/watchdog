@@ -8,14 +8,17 @@ var app = require('../app');
 var debug = require('debug')('web:server');
 var http = require('http');
 var httpProxy = require('http-proxy');
+var VIDEO_STREAM_HOST_PORT = "http://192.168.31.45:3001";
+var APPLICATION_PORT = "3000";
+//var PROXY_PORT = 8080;
+var PROXY_PORT = 80;
 
 var routes = [
-  'http://127.0.0.1:3000',
-  'http://192.168.31.45:3001'
+  "http://127.0.0.1:"+APPLICATION_PORT,
+  VIDEO_STREAM_HOST_PORT
 ];
 
 var proxy = httpProxy.createProxyServer({});
-
 var proxyServer = http.createServer(function (req, res) {
   var route=0;
   if (req.url.indexOf("stream/video.mjpeg") > -1) {
@@ -24,17 +27,18 @@ var proxyServer = http.createServer(function (req, res) {
 
   proxy.web(req, res, {target: routes[route]});
 });
+
 proxyServer.on('upgrade', function (req, socket, head) {
   proxy.ws(req, socket, head, {target: routes[1]});
 });
-//proxyServer.listen(8080,"127.0.0.1");
-proxyServer.listen(80,"127.0.0.1");
+
+proxyServer.listen(PROXY_PORT, "127.0.0.1");
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(process.env.PORT || APPLICATION_PORT);
 app.set('port', port);
 
 /**
