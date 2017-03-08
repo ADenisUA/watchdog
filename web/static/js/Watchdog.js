@@ -88,6 +88,24 @@ class Watchdog {
     startStreaming() {
         $("#streamingContainer").append('<img id="streamingView" src="/stream/video.mjpeg" width="100%" height="100%" />');
     }
+
+    turnOnLed() {
+        $.get("/api/write?content=led+r%3D255+g%3D255+b%3D255+index%3D2", function () {
+
+        });
+        $.get("/api/write?content=led+r%3D255+g%3D255+b%3D255+index%3D5", function () {
+
+        });
+        $.get("/api/write?content=led+r%3D255+g%3D255+b%3D255+index%3D11", function () {
+
+        });
+    }
+
+    turnOffLed() {
+        $.get("/api/write?content=led+r%3D0+g%3D0+b%3D0", function () {
+
+        });
+    }
 }
 
 class Utils {
