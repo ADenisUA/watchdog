@@ -26,8 +26,6 @@ var BtSerial = module.exports = function BtSerial() {
             if (_connection == null) {
                 _connect(name, address);
             }
-
-
         });
 
     this.connect = function(callback) {
@@ -42,7 +40,6 @@ var BtSerial = module.exports = function BtSerial() {
 
             console.log("Paired Devices");
 
-
             for (var i=0; i<devices.length; i++) {
                 var _device = devices[i];
                 if (_device && _device.name) {
@@ -52,6 +49,7 @@ var BtSerial = module.exports = function BtSerial() {
                     }
                 }
             }
+
             device.inquire();
         });
     };
