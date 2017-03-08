@@ -8,6 +8,7 @@ var BtSerial = module.exports = function BtSerial() {
     var _callback = null;
     var _address = null;
     const DEVICE_NAME = "Makeblock";
+    const DEVICE_ADDRESS = "00:0D:19:70:12:2C";
 
     btSerial.on('found', function found(address, name){
         console.log('Discovered BT device ' + name + ' ' + address);
@@ -44,34 +45,36 @@ var BtSerial = module.exports = function BtSerial() {
     this.connect = function(callback) {
         _callback = callback;
 
-        console.log("Trying to find BT device");
+        // console.log("Trying to find BT device");
+        //
+        // if (btSerial.isOpen()) {
+        //     if (_callback) _callback();
+        //     return;
+        // } else if (_address != null) {
+        //     _connect(DEVICE_NAME, _address);
+        //     return;
+        // }
+        //
+        // btSerial.listPairedDevices(function (devices) {
+        //
+        //     console.log("Paired BT Devices:");
+        //
+        //     for (var i=0; i<devices.length; i++) {
+        //         var _device = devices[i];
+        //         if (_device && _device.name) {
+        //             console.log(_device.name, _device.address);
+        //             if (_connect(_device.name, _device.address)) {
+        //                 return;
+        //             }
+        //         }
+        //     }
+        //
+        //     console.log("not found. Trying to discover devices");
+        //
+        //     btSerial.inquire();
+        // });
 
-        if (btSerial.isOpen()) {
-            if (_callback) _callback();
-            return;
-        } else if (_address != null) {
-            _connect(DEVICE_NAME, _address);
-            return;
-        }
-
-        btSerial.listPairedDevices(function (devices) {
-
-            console.log("Paired BT Devices:");
-
-            for (var i=0; i<devices.length; i++) {
-                var _device = devices[i];
-                if (_device && _device.name) {
-                    console.log(_device.name, _device.address);
-                    if (_connect(_device.name, _device.address)) {
-                        return;
-                    }
-                }
-            }
-
-            console.log("not found. Trying to discover devices");
-
-            btSerial.inquire();
-        });
+        _connect(DEVICE_NAME, DEVICE_ADDRESS);
     };
 
     var _connect = function(name, address) {
