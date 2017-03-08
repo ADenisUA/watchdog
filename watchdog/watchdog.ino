@@ -72,9 +72,18 @@ void loop()
 void waitForCommand() {
   Serial.println("Please enter command: "); //Prompt User for input
   Serial.println("findLightDirection, navigate, stop, forward, backward, left, right, backwardRight, backwardLeft, forwardRight, forwardLeft");
+
+//  uint16_t obstacleProximity = getObstacleProximity();
   
   while (!hasNewCommand()) {
     //Wait for user input
+//    if (!equalsWithinRange(obstacleProximity, getObstacleProximity(), DISTANCE_SENSITIVITY)) {
+//      Serial.println(getObstacleProximity());
+//    }
+//
+//    obstacleProximity = getObstacleProximity();
+//
+//    delay(DELAY_MICRO);
   }
 
   processNewCommand();
@@ -878,7 +887,7 @@ void setup()
   delay(5);
   attachInterrupt(Encoder_1.getIntNum(), isr_process_encoder1, RISING);
   attachInterrupt(Encoder_2.getIntNum(), isr_process_encoder2, RISING);
-  us = new MeUltrasonicSensor(PORT_10);
+  us = new MeUltrasonicSensor(PORT_6);
   led.setpin(RGBLED_PORT);
   buzzer.setpin(BUZZER_PORT);
   led.setColor(0,0,0,0);
