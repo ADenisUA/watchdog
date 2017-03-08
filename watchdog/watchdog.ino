@@ -121,6 +121,30 @@ boolean processNewCommand() {
   } else if (command.startsWith("right")) {
     Right(SPEED_DEFAULT);
     executeAndStopUntilNewCommandWithDelay();
+  } else if (command.startsWith("led")) {
+    int index = getCommandParamValueInt(command, "index");
+    int r = getCommandParamValueInt(command, "r");
+    int g = getCommandParamValueInt(command, "g");
+    int b = getCommandParamValueInt(command, "b");
+    Serial.println(index);
+    Serial.println(r);
+    Serial.println(g);
+    Serial.println(b);
+
+    if (index > -1) {
+      led.setColorAt(index,r,g,b);
+    } else {
+      led.setColor(r,g,b);
+    }
+    led.show();
+  } else if (command.startsWith("beep")) {
+
+    int frequency = getCommandParamValueInt(command, "frequency");
+    int duration = getCommandParamValueInt(command, "duration");
+    Serial.println(frequency);
+    Serial.println(duration);
+    
+    buzzer.tone(frequency, duration);
   }
 }
 
@@ -614,6 +638,27 @@ String getStringSegmentByIndex(String data, char separator, int index) {
     return dataPart;
 }
 
+String getCommandParamValue(String command, String paramName) {
+  String param = paramName + "=";
+  String paramValue = "";
+  
+  if (command.indexOf(paramName) > -1) {
+    command = command.substring(command.indexOf(paramName) + param.length());
+    int paramEndIndex = command.length();
+    if (command.indexOf(" ") > -1) {
+      paramEndIndex = command.indexOf(" ");
+    }
+    paramValue = command.substring(0, paramEndIndex);
+  }
+
+  return paramValue;
+}
+
+int getCommandParamValueInt(String command, String paramName) {
+  String paramValue = getCommandParamValue(command, paramName);
+  return (paramValue.length() > 0) ? paramValue.toInt() : -1;
+}
+
 /********* MOVEMENT RELATED **********/
 
 void Stop(void)
@@ -838,8 +883,8 @@ void setup()
   buzzer.setpin(BUZZER_PORT);
   led.setColor(0,0,0,0);
   led.show();
-  buzzer.tone(1000,100); 
-  buzzer.noTone();
+  //buzzer.tone(1000,100); 
+  //buzzer.noTone();
 
   // enable the watchdog
   delay(5);
@@ -864,5 +909,125 @@ void setup()
   Encoder_2.setSpeedPid(0.18,0,0);
   Encoder_1.setMotionMode(DIRECT_MODE);
   Encoder_2.setMotionMode(DIRECT_MODE);
+
+  demo();
+}
+
+void demo(void)
+{
+  uint8_t R_Bright = 0;
+  for(uint8_t i = 0;i < 40;i++)
+  {
+    led.setColor(0,R_Bright,R_Bright,R_Bright);
+    led.show();
+    R_Bright += 1;
+    delay(12);
+    
+  }
+
+  R_Bright = 40;
+  for(uint8_t i = 0;i < 40;i++)
+  {
+    led.setColor(0,R_Bright,R_Bright,R_Bright);
+    led.show();
+    R_Bright -= 1;
+    delay(12);
+    
+  }
+
+  buzzer.tone(988, 125);   //NOTE_B5
+  led.setColor(0,20,0,0);
+  led.show();
+  delay(200);
+  
+
+  led.setColor(0,20,5,0);
+  led.show();
+  delay(200);
+
+  led.setColor(0,15,15,0);
+  led.show();
+  delay(200);
+
+  led.setColor(0,0,20,0);
+  led.show();
+  delay(200);
+  
+
+  led.setColor(0,0,0,20);
+  led.show();
+  delay(200);
+
+  led.setColor(0,10,0,20);
+  led.show();
+  delay(200);
+
+  led.setColor(0,20,0,20);
+  led.show();
+  delay(200);
+  
+
+  led.setColor(0,0,0,0);
+  buzzer.tone(1976, 125);  //NOTE_B6
+  led.setColor(12,20,10,20);
+  led.setColor(1,20,10,20);
+  led.setColor(2,20,10,20);
+  led.show();
+  delay(375);
+  
+  buzzer.tone(1976, 125);  //NOTE_B6
+  led.setColor(3,20,20,0);
+  led.setColor(4,20,20,0);
+  led.setColor(5,20,20,0);
+  led.show();
+  delay(375);
+  
+  buzzer.tone(1976, 125);  //NOTE_B69
+  led.setColor(6,0,10,20);
+  led.setColor(7,0,10,20);
+  led.setColor(8,0,10,20);
+  led.show();
+  delay(500);
+  
+  buzzer.tone(1976, 125);  //NOTE_B69
+  led.setColor(9,10,0,0);
+  led.setColor(10,10,0,0);
+  led.setColor(11,10,0,0);
+  led.show();
+  delay(500);
+  
+
+  led.setColor(0,0,0,0);
+  for(uint8_t i=0;i<4;i++)
+  {
+    led.setColor(12,20,10,20);
+    led.setColor(1,20,10,20);
+    led.setColor(2,20,10,20);
+    
+    led.setColor(3,20,20,0);
+    led.setColor(4,20,20,0);
+    led.setColor(5,20,20,0);
+
+    led.setColor(6,0,10,20);
+    led.setColor(7,0,10,20);
+    led.setColor(8,0,10,20);
+
+    led.setColor(9,10,0,0);
+    led.setColor(10,10,0,0);
+    led.setColor(11,10,0,0);
+    led.show();
+    delay(2);
+    buzzer.tone(2349, 250);  //NOTE_D7
+    led.setColor(0,0,0,0);
+    led.show();
+    delay(100);
+    
+  }
+
+  buzzer.tone(262, 250);   //NOTE_D5
+  buzzer.tone(294, 250);   //NOTE_E5
+  buzzer.tone(330, 250);   //NOTE_C5
+  led.setColor(0,0,0,0);
+  led.show();
 }
 
