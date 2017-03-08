@@ -10,30 +10,53 @@ var BtSerial = module.exports = function BtSerial() {
     const DEVICE_NAME = "Makeblock";
 
     btSerial.on('found', function found(address, name){
-        console.log('Discovered device ' + name + ' ' + address);
+        console.log('Discovered BT device ' + name + ' ' + address);
 
         if (!btSerial.isOpen()) {
             _connect(name, address);
         }
     },function() {
-        console.log('found nothing');
+        console.log('no BT devices discovered');
+        if (_address == null) {
+            _this.connect(_callback);
+        }
     });
 
     btSerial.on('data', function(buffer) {
         console.log(buffer.toString('utf-8'));
     });
 
+    btSerial.on('closed', function() {
+        console.log("BT connection is closed");
+    });
+
+    btSerial.on('failure', function(error) {
+        console.log("BT error", error);
+    });
+
+    btSerial.on('finished', function() {
+        console.log("BT discovery is completed");
+        if (_address == null) {
+            _this.connect(_callback);
+        }
+    });
+
     this.connect = function(callback) {
         _callback = callback;
 
+        console.log("Trying to find BT device");
+
         if (btSerial.isOpen()) {
             if (_callback) _callback();
+            return;
+        } else if (_address != null) {
+            _connect(DEVICE_NAME, _address);
             return;
         }
 
         btSerial.listPairedDevices(function (devices) {
 
-            console.log("Paired Devices");
+            console.log("Paired BT Devices:");
 
             for (var i=0; i<devices.length; i++) {
                 var _device = devices[i];
@@ -45,10 +68,10 @@ var BtSerial = module.exports = function BtSerial() {
                 }
             }
 
+            console.log("not found. Trying to discover devices");
+
             btSerial.inquire();
         });
-
-        //btSerial.inquire();
     };
 
     var _connect = function(name, address) {
@@ -56,11 +79,11 @@ var BtSerial = module.exports = function BtSerial() {
             _address = address;
 
             btSerial.findSerialPortChannel(address, function (channel) {
-                console.log('Found RFCOMM channel for serial port on %s: ', name, channel);
+                console.log('Found BT COM channel for serial port on %s: ', name, channel);
 
                 if (channel < 0) {
                     _address = null;
-                    console.log("Channel is " + channel + " retrying");
+                    console.log("BT channel is " + channel + ". Retrying");
                     _this.connect(_callback);
                     return;
                 }
@@ -68,11 +91,11 @@ var BtSerial = module.exports = function BtSerial() {
                 // make bluetooth connect to remote device
                 btSerial.connect(address, channel, function () {
 
-                    console.log('Connected to ', name);
+                    console.log('Connected to BT device ', name);
                     if (_callback) _callback();
 
                 }, function() {
-                    console.log('Unable to connect ');
+                    console.log('Unable to connect to BT device. Retrying', name);
                     _this.connect(_callback);
                 });
 
@@ -84,18 +107,18 @@ var BtSerial = module.exports = function BtSerial() {
 
     this.write = function(content, callback) {
         if (!btSerial.isOpen()) {
-            console.log("Connection is closed. connecting...");
+            console.log("BT connection is closed. Reconnecting");
             _this.connect(function () {
                 btSerial.write(new Buffer(content, 'utf-8'), function(error, bytesWritten) {
                     if (error) console.log(error);
-                    console.log("bytesWritten", bytesWritten);
+                    //console.log("BT bytesWritten", bytesWritten);
                     if (callback) callback();
                 });
             });
         } else {
             btSerial.write(new Buffer(content, 'utf-8'), function(error, bytesWritten) {
                 if (error) console.log(error);
-                console.log("bytesWritten", bytesWritten);
+                //console.log("bytesWritten", bytesWritten);
                 if (callback) callback();
             });
         }
