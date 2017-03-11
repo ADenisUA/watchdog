@@ -53,6 +53,7 @@ long wheelStuckTime = 0;
 long distanceStuckTime = 0;
 long lastCommandTimeStamp = 0;
 uint16_t previousObstacleProximity = 0;
+String lastCommand = "";
 
 //TODO: detect stuck state
 //TODO: conditional turn (depends on what track is stuck)
@@ -135,10 +136,6 @@ boolean processNewCommand() {
     int r = getCommandParamValueInt(command, "r");
     int g = getCommandParamValueInt(command, "g");
     int b = getCommandParamValueInt(command, "b");
-    Serial.println(index);
-    Serial.println(r);
-    Serial.println(g);
-    Serial.println(b);
 
     if (index > -1) {
       led.setColorAt(index,r,g,b);
@@ -150,8 +147,6 @@ boolean processNewCommand() {
 
     int frequency = getCommandParamValueInt(command, "frequency");
     int duration = getCommandParamValueInt(command, "duration");
-    Serial.println(frequency);
-    Serial.println(duration);
     
     buzzer.tone(frequency, duration);
   }
