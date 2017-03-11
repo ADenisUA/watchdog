@@ -12,8 +12,8 @@
 }
 
 #streamingContainer {
-    width: 320px;
-    height: 240px;
+    width: 640px;
+    height: 480px;
     background-color: #000;
     position: relative;
     margin: 10px;
@@ -102,4 +102,8 @@
 #streamingContainer a#getSoundLevel {
     right: 30px;
     top: 50px;
+}
+#streamingContainer a#toggleStreaming {
+    left: 10px;
+    top: 10px;
 }
