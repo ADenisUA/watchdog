@@ -25,15 +25,12 @@
 #streamingContainer a,
 #streamingContainer a:hover,
 #streamingContainer a:visited {
-    text-underline: none;
     text-decoration: none;
-}
-
-#streamingContainer a {
+    font-size: 50px;
+    width: 60px;
+    height: 60px;
     display: block;
     /*border-radius: 10px;*/
-    width: 20px;
-    height: 20px;
     /*background-color: #aaa;*/
     text-align: center;
     vertical-align: middle;
@@ -44,66 +41,66 @@
 }
 
 #streamingContainer a#findLightDirection {
-    right: 30px;
-    top: 10px;
+    left: 10px;
+    bottom: 10px;
 }
 #streamingContainer a#navigate {
     right: 10px;
     top: 10px;
 }
 #streamingContainer a#beep {
-    right: 10px;
-    top: 30px;
+    left: 70px;
+    bottom: 10px;
 }
 #streamingContainer a#toggleLed {
-    right: 30px;
-    top: 30px;
+    right: 70px;
+    top: 10px;
 }
 #streamingContainer a#moveForwardLeft {
-    right: 50px;
-    bottom: 50px;
+    right: 130px;
+    bottom: 130px;
 }
 #streamingContainer a#moveForward {
-    right: 30px;
-    bottom: 55px;
+    right: 70px;
+    bottom: 150px;
 }
 #streamingContainer a#moveForwardRight {
     right: 10px;
-    bottom: 50px;
+    bottom: 130px;
 }
 #streamingContainer a#turnLeft {
-    right: 55px;
-    bottom: 30px;
+    right: 140px;
+    bottom: 70px;
 }
 #streamingContainer a#stop {
-    right: 30px;
-    bottom: 30px;
+    right: 70px;
+    bottom: 70px;
 }
 #streamingContainer a#turnRight {
-    right: 5px;
-    bottom: 30px;
+    right: 0px;
+    bottom: 70px;
 }
 #streamingContainer a#moveBackwardLeft {
-    right: 50px;
+    right: 130px;
     bottom: 10px;
 }
 #streamingContainer a#moveBackward {
-    right: 30px;
-    bottom: 5px;
+    right: 70px;
+    bottom: 10px;
 }
 #streamingContainer a#moveBackwardRight {
     right: 10px;
     bottom: 10px;
 }
 #streamingContainer a#getTemperature {
-    right: 10px;
-    top: 50px;
+    left: 180px;
+    bottom: 10px;
 }
 #streamingContainer a#getSoundLevel {
-    right: 30px;
-    top: 50px;
+    left: 130px;
+    bottom: 10px;
 }
 #streamingContainer a#toggleStreaming {
-    left: 10px;
+    right: 10px;
     top: 10px;
 }
