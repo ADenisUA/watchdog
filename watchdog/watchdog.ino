@@ -168,7 +168,7 @@ boolean processNonInterruptingCommand() {
     isProcessed = true;
   } else if (isCommand(COMMAND_GET_SOUND_LEVEL)) {
 
-    lastSoundLevel = 0;
+    lastSoundLevel = -SOUND_LEVEL_THRESHOLD;
     checkSoundLevel();
 
     isProcessed = true;

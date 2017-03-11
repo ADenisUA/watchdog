@@ -82,12 +82,32 @@ class Watchdog {
         });
     }
 
+    toggleStreaming() {
+        if (this.isStreaming) {
+            this.stopStreaming();
+        } else {
+            this.startStreaming();
+        }
+
+        this.isStreaming = !this.isStreaming;
+    }
+
     stopStreaming() {
         $("#streamingView").remove();
     }
 
     startStreaming() {
         $("#streamingContainer").append('<img id="streamingView" src="/stream/video.mjpeg" width="100%" height="100%" />');
+    }
+
+    toggleLed() {
+        if (this.isLedOn) {
+            this.turnOffLed();
+        } else {
+            this.turnOnLed();
+        }
+
+        this.isLedOn = !this.isLedOn;
     }
 
     turnOnLed(callback) {
@@ -128,7 +148,7 @@ class Watchdog {
         $.get("/api/listen", function (data) {
             Utils.callFunction(callback);
             console.log(data);
-            $("#output").html($("#output").html() + data.data);
+            $("#output").html(data.data + $("#output").html());
             instance.listen(callback);
         });
     }

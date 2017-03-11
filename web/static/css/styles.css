@@ -1,3 +1,105 @@
 #output {
-    min-height: 100px;
+    width: 640px;
+    position: relative;
+    display: block;
+    margin: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    height: 160px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#streamingContainer {
+    width: 320px;
+    height: 240px;
+    background-color: #000;
+    position: relative;
+    margin: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+#streamingContainer a,
+#streamingContainer a:hover,
+#streamingContainer a:visited {
+    text-underline: none;
+    text-decoration: none;
+}
+
+#streamingContainer a {
+    display: block;
+    /*border-radius: 10px;*/
+    width: 20px;
+    height: 20px;
+    /*background-color: #aaa;*/
+    text-align: center;
+    vertical-align: middle;
+    /*border: 1px solid #555;*/
+    cursor: pointer;
+    color: #fff;
+    position: absolute;
+}
+
+#streamingContainer a#findLightDirection {
+    right: 30px;
+    top: 10px;
+}
+#streamingContainer a#navigate {
+    right: 10px;
+    top: 10px;
+}
+#streamingContainer a#beep {
+    right: 10px;
+    top: 30px;
+}
+#streamingContainer a#toggleLed {
+    right: 30px;
+    top: 30px;
+}
+#streamingContainer a#moveForwardLeft {
+    right: 50px;
+    bottom: 50px;
+}
+#streamingContainer a#moveForward {
+    right: 30px;
+    bottom: 55px;
+}
+#streamingContainer a#moveForwardRight {
+    right: 10px;
+    bottom: 50px;
+}
+#streamingContainer a#turnLeft {
+    right: 55px;
+    bottom: 30px;
+}
+#streamingContainer a#stop {
+    right: 30px;
+    bottom: 30px;
+}
+#streamingContainer a#turnRight {
+    right: 5px;
+    bottom: 30px;
+}
+#streamingContainer a#moveBackwardLeft {
+    right: 50px;
+    bottom: 10px;
+}
+#streamingContainer a#moveBackward {
+    right: 30px;
+    bottom: 5px;
+}
+#streamingContainer a#moveBackwardRight {
+    right: 10px;
+    bottom: 10px;
+}
+#streamingContainer a#getTemperature {
+    right: 10px;
+    top: 50px;
+}
+#streamingContainer a#getSoundLevel {
+    right: 30px;
+    top: 50px;
 }
