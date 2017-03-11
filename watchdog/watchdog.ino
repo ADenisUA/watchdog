@@ -11,13 +11,40 @@
 #define POWER_PORT                           A4
 #define BUZZER_PORT                          45
 #define RGBLED_PORT                          44
+#define US_PORT                              PORT_6
 
-//#define COMMAND_STOP                            0x00
-//#define COMMAND_FIND_LIGHT                      0x01
-//#define COMMAND_NAVIGATE                        0x02
+#define COMMAND_LED                             "led"
+#define COMMAND_BEEP                            "beep"
+#define COMMAND_GET_TEMPERATURE                 "getTemperature"
+#define COMMAND_GET_SOUND_LEVEL                 "getSoundLevel"
+
+#define COMMAND_STOP                            "stop"
+#define COMMAND_FIND_LIGHT                      "findLightDirection"
+#define COMMAND_NAVIGATE                        "navigate"
+#define COMMAND_LEFT                            "left"
+#define COMMAND_RIGHT                           "right"
+#define COMMAND_FORWARD                         "forward"
+#define COMMAND_BACKWARD                        "backward"
+#define COMMAND_FORWARD_LEFT                    "forwardLeft"
+#define COMMAND_FORWARD_RIGHT                   "forwardRight"
+#define COMMAND_BACKWARD_LEFT                   "backwardLeft"
+#define COMMAND_BACKWARD_RIGHT                  "backwardRight"
+
+#define EVENT_TILT                              "onTilt"
+#define EVENT_OBSTACLE                          "onObstacle"
+#define EVENT_FREE_WAY                          "onObstacleFree"
+#define EVENT_PROXIMITY                         "onProximity"
+#define EVENT_FOUND_LIGHT_DIRECTION             "onFoundLightDirection"
+#define EVENT_NOT_MOVING                        "onNotMoving"
+#define EVENT_STUCK                             "onStuck"
+#define EVENT_PROXIMITY                         "onProximity"
+#define EVENT_TEMPERATURE                       "onTemperature"
+#define EVENT_SOUND_LEVEL                       "onSoundLevel"
 
 //constants
 #define ANGLE_SENSITIVITY           5
+#define TEMPERATURE_THRESHOLD       1.00f
+#define SOUND_LEVEL_THRESHOLD       200.00f
 
 #define SPEED_DEFAULT               100
 #define SPEED_FIND_LIGHT_DIRECTION  75
@@ -47,17 +74,23 @@ MeRGBLed led;
 MeBuzzer buzzer;
 MeLightSensor lightsensor_12(12);
 MeLightSensor lightsensor_11(11);
+MeOnBoardTemp temperature_onboard(PORT_13);
+MeSoundSensor soundsensor_14(14);
 
 //variables
 long wheelStuckTime = 0;
 long distanceStuckTime = 0;
-long lastCommandTimeStamp = 0;
 uint16_t previousObstacleProximity = 0;
-String lastCommand = "";
 
-//TODO: detect stuck state
+String lastCommand = "";
+long lastCommandTimeStamp = 0;
+float lastTemperature = -TEMPERATURE_THRESHOLD;
+float lastSoundLevel = -SOUND_LEVEL_THRESHOLD;
+
+long lastSensorUpdateTimeStamp = 0;
+
 //TODO: conditional turn (depends on what track is stuck)
-//TODO: random turn on obstacle avoidance
+//TODO: not random turn on obstacle avoidance
 //TODO: tilt and stuck check when going backwards
 //TODO: change direction if it goes backwards too long
 
@@ -71,71 +104,45 @@ void loop()
  */
 
 void waitForCommand() {
-  Serial.println("Please enter command: "); //Prompt User for input
-  Serial.println("findLightDirection, navigate, stop, forward, backward, left, right, backwardRight, backwardLeft, forwardRight, forwardLeft");
-
-//  uint16_t obstacleProximity = getObstacleProximity();
+  processInterruptingCommand();
   
-  while (!hasNewCommand()) {
-    //Wait for user input
-//    if (!equalsWithinRange(obstacleProximity, getObstacleProximity(), DISTANCE_SENSITIVITY)) {
-//      Serial.println(getObstacleProximity());
-//    }
-//
-//    obstacleProximity = getObstacleProximity();
-//
-//    delay(DELAY_MICRO);
+  while (!isInterrupted()) {
+    ;
   }
 
-  processNewCommand();
+  processInterruptingCommand();
+}
+
+boolean isInterrupted() {
+  runBackgroundProcesses();
+  
+  if (hasNewCommand()) {
+    lastCommand = Serial.readString();
+    Serial.print("Received command: ");
+    Serial.println(lastCommand);
+    lastCommandTimeStamp = millis();
+    return !processNonInterruptingCommand();
+  }
+
+  return false;
 }
 
 boolean hasNewCommand() {
   return Serial.available() > 0;
 }
 
-boolean processNewCommand() {
-  String command = Serial.readString();
-  
-  Serial.print("Received command: ");
-  Serial.println(command);
-  lastCommandTimeStamp = millis();
+boolean isCommand(String command) {
+  return lastCommand.startsWith(command);
+}
 
-  if (command.startsWith("findLightDirection")) {
-    commandFindLightDirection();
-  } else if (command.startsWith("navigate")) {
-    commandNavigate();
-  } else if (command.startsWith("stop")) {
-    Stop();
-  } else if (command.startsWith("backwardRight")) {
-    BackwardAndTurnRight(SPEED_DEFAULT);
-    executeAndStopUntilNewCommandWithDelay();
-  } else if (command.startsWith("backwardLeft")) {
-    BackwardAndTurnLeft(SPEED_DEFAULT);
-    executeAndStopUntilNewCommandWithDelay();
-  } else if (command.startsWith("forwardRight")) {
-    TurnRight(SPEED_DEFAULT);
-    executeAndStopUntilNewCommandWithDelay();
-  } else if (command.startsWith("forwardLeft")) {
-    TurnLeft(SPEED_DEFAULT);
-    executeAndStopUntilNewCommandWithDelay();
-  } else if (command.startsWith("forward")) {
-    Forward(SPEED_DEFAULT);
-    executeAndStopUntilNewCommandWithDelay();
-  } else if (command.startsWith("backward")) {
-    Backward(SPEED_DEFAULT);
-    executeAndStopUntilNewCommandWithDelay();
-  } else if (command.startsWith("left")) {
-    Left(SPEED_DEFAULT);
-    executeAndStopUntilNewCommandWithDelay();
-  } else if (command.startsWith("right")) {
-    Right(SPEED_DEFAULT);
-    executeAndStopUntilNewCommandWithDelay();
-  } else if (command.startsWith("led")) {
-    int index = getCommandParamValueInt(command, "index");
-    int r = getCommandParamValueInt(command, "r");
-    int g = getCommandParamValueInt(command, "g");
-    int b = getCommandParamValueInt(command, "b");
+boolean processNonInterruptingCommand() {
+  boolean isProcessed = false;
+  
+  if (isCommand(COMMAND_LED)) {
+    int index = getCommandParamValueInt(lastCommand, "index");
+    int r = getCommandParamValueInt(lastCommand, "r");
+    int g = getCommandParamValueInt(lastCommand, "g");
+    int b = getCommandParamValueInt(lastCommand, "b");
 
     if (index > -1) {
       led.setColorAt(index,r,g,b);
@@ -143,22 +150,129 @@ boolean processNewCommand() {
       led.setColor(r,g,b);
     }
     led.show();
-  } else if (command.startsWith("beep")) {
 
-    int frequency = getCommandParamValueInt(command, "frequency");
-    int duration = getCommandParamValueInt(command, "duration");
+    isProcessed = true;
+  } else if (isCommand(COMMAND_BEEP)) {
+
+    int frequency = getCommandParamValueInt(lastCommand, "frequency");
+    int duration = getCommandParamValueInt(lastCommand, "duration");
     
     buzzer.tone(frequency, duration);
+
+    isProcessed = true;
+  } else if (isCommand(COMMAND_GET_TEMPERATURE)) {
+
+    lastTemperature = 0;
+    checkTemperature();
+
+    isProcessed = true;
+  } else if (isCommand(COMMAND_GET_SOUND_LEVEL)) {
+
+    lastSoundLevel = 0;
+    checkSoundLevel();
+
+    isProcessed = true;
   }
+
+  if (isProcessed) {
+    lastCommand = "";
+  }
+
+  return isProcessed;
+}
+
+boolean processInterruptingCommand() {
+  boolean isProcessed = false;
+
+  if (isCommand(COMMAND_FIND_LIGHT)) {
+    lastCommand = "";
+    commandFindLightDirection();
+    isProcessed = true;
+  } else if (isCommand(COMMAND_NAVIGATE)) {
+    lastCommand = "";
+    commandNavigate();
+    isProcessed = true;
+  } else if (isCommand(COMMAND_STOP)) {
+    lastCommand = "";
+    Stop();
+    isProcessed = true;
+  } else if (isCommand(COMMAND_BACKWARD_RIGHT)) {
+    lastCommand = "";
+    BackwardAndTurnRight(SPEED_DEFAULT);
+    executeAndStopUntilNewCommandWithDelay();
+    isProcessed = true;
+  } else if (isCommand(COMMAND_BACKWARD_LEFT)) {
+    lastCommand = "";
+    BackwardAndTurnLeft(SPEED_DEFAULT);
+    executeAndStopUntilNewCommandWithDelay();
+    isProcessed = true;
+  } else if (isCommand(COMMAND_FORWARD_RIGHT)) {
+    lastCommand = "";
+    TurnRight(SPEED_DEFAULT);
+    executeAndStopUntilNewCommandWithDelay();
+    isProcessed = true;
+  } else if (isCommand(COMMAND_FORWARD_LEFT)) {
+    lastCommand = "";
+    TurnLeft(SPEED_DEFAULT);
+    executeAndStopUntilNewCommandWithDelay();
+    isProcessed = true;
+  } else if (isCommand(COMMAND_FORWARD)) {
+    lastCommand = "";
+    Forward(SPEED_DEFAULT);
+    executeAndStopUntilNewCommandWithDelay();
+    isProcessed = true;
+  } else if (isCommand(COMMAND_BACKWARD)) {
+    lastCommand = "";
+    Backward(SPEED_DEFAULT);
+    executeAndStopUntilNewCommandWithDelay();
+    isProcessed = true;
+  } else if (isCommand(COMMAND_LEFT)) {
+    lastCommand = "";
+    Left(SPEED_DEFAULT);
+    executeAndStopUntilNewCommandWithDelay();
+    isProcessed = true;
+  } else if (isCommand(COMMAND_RIGHT)) {
+    lastCommand = "";
+    Right(SPEED_DEFAULT);
+    executeAndStopUntilNewCommandWithDelay();
+    isProcessed = true;
+  }
+
+  return isProcessed;
 }
 
 void executeAndStopUntilNewCommandWithDelay() {
-    do {
-      if (millis() > lastCommandTimeStamp + DELAY_MACRO) {
-        Stop(); //we hit delay
-        return;
-      }
-    } while (!hasNewCommand());  
+  do {
+    if (millis() > lastCommandTimeStamp + DELAY_MACRO) {
+      Stop(); //we hit delay
+      return;
+    }
+  } while (!isInterrupted());
+}
+
+void runBackgroundProcesses() {
+    checkTemperature();
+    checkSoundLevel();
+}
+
+void checkTemperature() {
+  float currentTemperature = getTemperature();
+  if (!equalsWithinRange(lastTemperature, currentTemperature, TEMPERATURE_THRESHOLD)) {
+    lastTemperature = currentTemperature;
+    Serial.print(EVENT_TEMPERATURE);
+    Serial.print(" temperature=");
+    Serial.println(currentTemperature);   
+  }
+}
+
+void checkSoundLevel() {
+  float currentSoundLevel = getSoundLevel();
+  if (!equalsWithinRange(lastSoundLevel, currentSoundLevel, SOUND_LEVEL_THRESHOLD)) {
+    lastSoundLevel = currentSoundLevel;
+    Serial.print(EVENT_SOUND_LEVEL);
+    Serial.print(" soundLevel=");
+    Serial.println(currentSoundLevel);   
+  }
 }
 
 /**
@@ -190,24 +304,20 @@ boolean commandNavigate() {
 
     delay(DELAY_NANO);
     
-  } while (!hasNewCommand());
-
-  Serial.println("Detected new command");
-
-  Stop();
-
-  delay(DELAY_DEFAULT);
+  } while (!isInterrupted());
 }
 
 /**
  * Critical angle or don't see the ground - move backward
  */
 void modeOnTilt() {
-  Serial.print("Tilt alert!!! gyroX=");
+  
+  Serial.print(EVENT_TILT);
+  Serial.print(" x=");
   Serial.print(getGyroX());
-  Serial.print(" gyroY=");
+  Serial.print(" y=");
   Serial.print(getGyroY());
-  Serial.print(" groundFlag=");
+  Serial.print(" ground=");
   Serial.println(getGroundFlag());  
 
   Backward(SPEED_DEFAULT);
@@ -224,7 +334,7 @@ void modeOnTilt() {
        
     delay(DELAY_NANO);
 
-    if (hasNewCommand()) {
+    if (isInterrupted()) {
       break;
     }
     
@@ -234,12 +344,12 @@ void modeOnTilt() {
 
   resetStuckTimer();
 
-  Serial.print("Tilt alert is fixed gyroX=");
-  Serial.print(getGyroX());
-  Serial.print(" gyroY=");
-  Serial.print(getGyroY());
-  Serial.print(" groundFlag=");
-  Serial.println(getGroundFlag()); 
+//  Serial.print("Tilt alert is fixed gyroX=");
+//  Serial.print(getGyroX());
+//  Serial.print(" gyroY=");
+//  Serial.print(getGyroY());
+//  Serial.print(" groundFlag=");
+//  Serial.println(getGroundFlag()); 
 }
 
 /**
@@ -248,7 +358,8 @@ void modeOnTilt() {
 void modeObstacleIsTooClose() {
   uint16_t obstacleProximity = getObstacleProximity();
   
-  Serial.print("Too close! turning ");
+  Serial.print(EVENT_OBSTACLE);
+  Serial.print(" distance=");
   Serial.println(obstacleProximity);
 
   Backward(SPEED_DEFAULT);
@@ -269,7 +380,7 @@ void modeObstacleIsTooClose() {
       return;
     }
 
-    if (hasNewCommand()) {
+    if (isInterrupted()) {
       break;
     }
     
@@ -277,7 +388,8 @@ void modeObstacleIsTooClose() {
     
   } while (obstacleProximity < DISTANCE_OBSTACLE_DETECTED);
 
-  Serial.print("Found obstacle free direction ");
+  Serial.print(EVENT_FREE_WAY);
+  Serial.print(" distance=");
   Serial.println(obstacleProximity);
 
   delay(DELAY_MICRO);
@@ -290,8 +402,9 @@ void modeObstacleIsTooClose() {
  */
 void modeAvoidObstacle() {
   uint16_t obstacleProximity = getObstacleProximity();
-  
-  Serial.print("Obstacle detected. Avoiding. ");
+
+  Serial.print(EVENT_PROXIMITY);
+  Serial.print(" distance=");
   Serial.println(obstacleProximity);
   
   //moveWithTurn(SPEED_DEFAULT, getRandomDirection());
@@ -316,13 +429,14 @@ void modeAvoidObstacle() {
       return;
     }
 
-    if (hasNewCommand()) {
+    if (isInterrupted()) {
       break;
     }
     
   } while (obstacleProximity < DISTANCE_OBSTACLE_DETECTED);
 
-  Serial.print("Found obstacle free direction ");
+  Serial.print(EVENT_FREE_WAY);
+  Serial.print(" distance=");
   Serial.println(obstacleProximity);
 
   delay(DELAY_MICRO);
@@ -348,6 +462,7 @@ void modeContinueNavigation() {
  * it's stuck. Moving backward
  */
 void modeStuck() {
+  
   Backward(SPEED_DEFAULT);
   
   delay(DELAY_DEFAULT);
@@ -376,10 +491,10 @@ boolean commandFindLightDirection() {
   float lightBalance = getLightBalance();
   float dAngle = 0;
 
-  Serial.print("Searching for light direction. lightBalance=");
-  Serial.print(lightBalance);
-  Serial.print(" lightLevel=");
-  Serial.println(lightLevel);
+//  Serial.print("Searching for light direction. lightBalance=");
+//  Serial.print(lightBalance);
+//  Serial.print(" lightLevel=");
+//  Serial.println(lightLevel);
 
   if (lightBalance < 1) {
     Right(SPEED_DEFAULT);
@@ -399,7 +514,7 @@ boolean commandFindLightDirection() {
       dAngle += abs(normalizeAngle(currentDirection - gyroZ));
       currentDirection = gyroZ;
 
-      if (hasNewCommand()) {
+      if (isInterrupted()) {
         break;
       }
 
@@ -408,7 +523,8 @@ boolean commandFindLightDirection() {
 
   Stop();
 
-  Serial.print("Found light direction. direction=");
+  Serial.print(EVENT_FOUND_LIGHT_DIRECTION);
+  Serial.print(" direction=");
   Serial.print(maxLightLevelDirection);
   Serial.print(" lightLevel=");
   Serial.println(maxLightLevel);
@@ -425,10 +541,10 @@ boolean turnToAngle(uint8_t moveSpeed, int16_t angle) {
   angle = normalizeAngle(angle);
   int16_t currentAngle = getGyroZ();
 
-  Serial.print("Started turn. angle=");
-  Serial.print(angle);
-  Serial.print(" currentAngle=");
-  Serial.println(currentAngle);
+//  Serial.print("Started turn. angle=");
+//  Serial.print(angle);
+//  Serial.print(" currentAngle=");
+//  Serial.println(currentAngle);
 
   if (normalizeAngle(angle-currentAngle) > 0) {
     Right(moveSpeed);
@@ -439,7 +555,7 @@ boolean turnToAngle(uint8_t moveSpeed, int16_t angle) {
   do {
     currentAngle = getGyroZ();
 
-    if (hasNewCommand()) {
+    if (isInterrupted()) {
       break;
     }
     
@@ -447,10 +563,10 @@ boolean turnToAngle(uint8_t moveSpeed, int16_t angle) {
   
   Stop();
   
-  Serial.print("Completed turn. angle=");
-  Serial.print(angle);
-  Serial.print(" currentAngle=");
-  Serial.println(currentAngle);
+//  Serial.print("Completed turn. angle=");
+//  Serial.print(angle);
+//  Serial.print(" currentAngle=");
+//  Serial.println(currentAngle);
   
   delay(DELAY_DEFAULT);
   
@@ -526,6 +642,14 @@ float normalizeAngle(float angle) {
   return angle;
 }
 
+float getTemperature() {
+  return temperature_onboard.readValue();
+}
+
+float getSoundLevel() {
+    return soundsensor_14.strength();
+}
+
 /********* UTILITIES **************/
 
 float getRandomDirection() {
@@ -557,10 +681,11 @@ boolean distanceIsNotChanging() {
   result = result && distanceStuckTime > 0 && (millis() > (distanceStuckTime + DELAY_DEFAULT*2));
 
   if (result) {
-    Serial.print("Stuck (distance)! ");
-    Serial.print(" previousObstacleProximity=");
+
+    Serial.print(EVENT_NOT_MOVING);
+    Serial.print(" previousDistance=");
     Serial.print(previousObstacleProximity);
-    Serial.print(" obstacleProximity=");
+    Serial.print(" distance=");
     Serial.println(obstacleProximity);
   }
 
@@ -599,14 +724,15 @@ boolean areWheelsStuck() {
   result = result && wheelStuckTime > 0 && (millis() > (wheelStuckTime + DELAY_DEFAULT));
 
   if (result) {
-    Serial.print("Stuck! (wheels) ");
-    Serial.print(" ");
+
+    Serial.print(EVENT_STUCK);
+    Serial.print(" motorL=");
     Serial.print(currentMotorPowerL);
-    Serial.print("/");
+    Serial.print(" speedL");
     Serial.print(currentSpeedL);
-    Serial.print(" ");
+    Serial.print(" motorR=");
     Serial.print(currentMotorPowerR);
-    Serial.print("/");
+    Serial.print(" speedR=");
     Serial.println(currentSpeedR);
   }
 
@@ -661,6 +787,44 @@ String getCommandParamValue(String command, String paramName) {
 int getCommandParamValueInt(String command, String paramName) {
   String paramValue = getCommandParamValue(command, paramName);
   return (paramValue.length() > 0) ? paramValue.toInt() : -1;
+}
+
+const int16_t TEMPERATURENOMINAL     = 25;    //Nominl temperature depicted on the datasheet
+const int16_t SERIESRESISTOR         = 10000; // Value of the series resistor
+const int16_t BCOEFFICIENT           = 3380;  // Beta value for our thermistor(3350-3399)
+const int16_t TERMISTORNOMINAL       = 10000; // Nominal temperature value for the thermistor
+
+/**
+ * \par Function
+ *    calculate_temp
+ * \par Description
+ *    This function is used to convert the temperature.
+ * \param[in]
+ *    In_temp - Analog values from sensor.
+ * \par Output
+ *    None
+ * \return
+ *    the temperature in degrees Celsius
+ * \par Others
+ *    None
+ */
+float calculate_temp(int16_t In_temp)
+{
+  float media;
+  float temperatura;
+  media = (float)In_temp;
+  // Convert the thermal stress value to resistance
+  media = 1023.0 / media - 1;
+  media = SERIESRESISTOR / media;
+  //Calculate temperature using the Beta Factor equation
+
+  temperatura = media / TERMISTORNOMINAL;              // (R/Ro)
+  temperatura = log(temperatura); // ln(R/Ro)
+  temperatura /= BCOEFFICIENT;                         // 1/B * ln(R/Ro)
+  temperatura += 1.0 / (TEMPERATURENOMINAL + 273.15);  // + (1/To)
+  temperatura = 1.0 / temperatura;                     // Invert the value
+  temperatura -= 273.15;                               // Convert it to Celsius
+  return temperatura;
 }
 
 /********* MOVEMENT RELATED **********/
@@ -882,13 +1046,13 @@ void setup()
   delay(5);
   attachInterrupt(Encoder_1.getIntNum(), isr_process_encoder1, RISING);
   attachInterrupt(Encoder_2.getIntNum(), isr_process_encoder2, RISING);
-  us = new MeUltrasonicSensor(PORT_6);
+  us = new MeUltrasonicSensor(US_PORT);
   led.setpin(RGBLED_PORT);
   buzzer.setpin(BUZZER_PORT);
   led.setColor(0,0,0,0);
   led.show();
-  //buzzer.tone(1000,100); 
-  //buzzer.noTone();
+  buzzer.tone(1000,100); 
+  buzzer.noTone();
 
   // enable the watchdog
   delay(5);
@@ -914,7 +1078,7 @@ void setup()
   Encoder_1.setMotionMode(DIRECT_MODE);
   Encoder_2.setMotionMode(DIRECT_MODE);
 
-  demo();
+  //demo();
 }
 
 void demo(void)

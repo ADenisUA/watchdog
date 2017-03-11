@@ -6,6 +6,7 @@ var btSerial = new (require('bluetooth-serial-port')).BluetoothSerialPort();
 var BtSerial = module.exports = function BtSerial() {
     var _this = this;
     var _callback = null;
+    var _listenCallback = null;
     var _address = null;
     const DEVICE_NAME = "Makeblock";
     const DEVICE_ADDRESS = "00:0D:19:70:12:2C";
@@ -24,7 +25,9 @@ var BtSerial = module.exports = function BtSerial() {
     });
 
     btSerial.on('data', function(buffer) {
-        console.log(buffer.toString('utf-8'));
+        var data = buffer.toString('utf-8');
+        console.log(data);
+        if (_listenCallback) _listenCallback(data);
     });
 
     btSerial.on('closed', function() {
@@ -126,4 +129,8 @@ var BtSerial = module.exports = function BtSerial() {
             });
         }
     };
+
+    this.listen = function(callback) {
+        _listenCallback = callback;
+    }
 };

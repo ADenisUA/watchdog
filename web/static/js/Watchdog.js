@@ -11,6 +11,7 @@ class Watchdog {
     static getInstance() {
         if (!instance) {
             instance = new Watchdog();
+            instance.listen(null);
         }
         return instance;
     }
@@ -102,6 +103,33 @@ class Watchdog {
     turnOffLed(callback) {
         $.get("/api/write?content=led+r%3D0+g%3D0+b%3D0", function () {
             Utils.callFunction(callback);
+        });
+    }
+
+    beep(callback) {
+        $.get("/api/write?content=beep+duration%3D1000+frequency%3D1000", function () {
+            Utils.callFunction(callback);
+        });
+    }
+
+    getTemperature(callback) {
+        $.get("/api/write?content=getTemperature", function () {
+            Utils.callFunction(callback);
+        });
+    }
+
+    getSoundLevel(callback) {
+        $.get("/api/write?content=getSoundLevel", function () {
+            Utils.callFunction(callback);
+        });
+    }
+
+    listen(callback) {
+        $.get("/api/listen", function (data) {
+            Utils.callFunction(callback);
+            console.log(data);
+            $("#output").html($("#output").html() + data.data);
+            instance.listen(callback);
         });
     }
 }

@@ -26,4 +26,17 @@ router.get('/write', function(request, response) {
     });
 });
 
+var listenData = "";
+
+router.get('/listen', function(request, response) {
+    btSerial.listen(function (data) {
+        listenData += data;
+
+        if (!response.finished) {
+            response.status(200).json({data: listenData});
+            listenData = "";
+        }
+    });
+});
+
 module.exports = router;
