@@ -42,19 +42,19 @@
 }
 
 #streamingContainer a#findLightDirection {
-    left: 10px;
-    bottom: 10px;
+    left: 80px;
+    top: 10px;
 }
 #streamingContainer a#navigate {
-    right: 10px;
+    left: 10px;
     top: 10px;
 }
 #streamingContainer a#beep {
-    left: 70px;
-    bottom: 10px;
+    right: 150px;
+    top: 10px;
 }
 #streamingContainer a#toggleLed {
-    right: 70px;
+    right: 80px;
     top: 10px;
 }
 #streamingContainer a#moveForwardLeft {
@@ -94,11 +94,11 @@
     bottom: 10px;
 }
 #streamingContainer a#getTemperature {
-    left: 180px;
+    left: 80px;
     bottom: 10px;
 }
 #streamingContainer a#getSoundLevel {
-    left: 130px;
+    left: 10px;
     bottom: 10px;
 }
 #streamingContainer a#toggleStreaming {
