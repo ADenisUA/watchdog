@@ -15,30 +15,27 @@
 </head>
 
 <body>
+    <div id="streamingContainer">
+        <!--img id="streamingView" src="/stream/video.mjpeg" width="100%" height="100%" /-->
 
-    <div class="container">
-        <div id="streamingContainer">
-            <!--img id="streamingView" src="/stream/video.mjpeg" width="100%" height="100%" /-->
-
-            <a href="#" id="findLightDirection" onclick="Watchdog.getInstance().findLightDirection()">&#x1F31E;</a>
-            <a href="#" id="navigate" onclick="Watchdog.getInstance().navigate()">&#9784;</a>
-            <a href="#" id="toggleStreaming" onclick="Watchdog.getInstance().toggleStreaming()">&#x23ef;</a>
-            <a href="#" id="beep" onclick="Watchdog.getInstance().beep()">&#x1F50A;</a>
-            <a href="#" id="toggleLed" onclick="Watchdog.getInstance().toggleLed()">&#x1F4A1;</a>
-            <a href="#" id="moveForwardLeft" onclick="Watchdog.getInstance().moveForwardLeft()">&nwarr; </a>
-            <a href="#" id="moveForward" onclick="Watchdog.getInstance().moveForward()">&uarr;</a>
-            <a href="#" id="moveForwardRight" onclick="Watchdog.getInstance().moveForwardRight()">&nearr; </a>
-            <a href="#" id="turnLeft" onclick="Watchdog.getInstance().turnLeft()">&larr;</a>
-            <a href="#" id="stop" onclick="Watchdog.getInstance().stop()">&#9940;</a>
-            <a href="#" id="turnRight" onclick="Watchdog.getInstance().turnRight()">&rarr;</a>
-            <a href="#" id="moveBackwardLeft" onclick="Watchdog.getInstance().moveBackwardLeft()">&swarr;</a>
-            <a href="#" id="moveBackward" onclick="Watchdog.getInstance().moveBackward()">&darr;</a>
-            <a href="#" id="moveBackwardRight" onclick="Watchdog.getInstance().moveBackwardRight()">&searr;</a>
-            <a href="#" id="getTemperature" onclick="Watchdog.getInstance().getTemperature()">&#x1f321;</a>
-            <a href="#" id="getSoundLevel" onclick="Watchdog.getInstance().getSoundLevel()">&#x1F3A4; </a>
-        </div>
-        <div id="output"></div>
+        <a href="#" id="findLightDirection" onclick="Watchdog.getInstance().findLightDirection()">&#x1F31E;</a>
+        <a href="#" id="navigate" onclick="Watchdog.getInstance().navigate()">&#9784;</a>
+        <a href="#" id="toggleStreaming" onclick="Watchdog.getInstance().toggleStreaming()">&#x23ef;</a>
+        <a href="#" id="beep" onclick="Watchdog.getInstance().beep()">&#x1F50A;</a>
+        <a href="#" id="toggleLed" onclick="Watchdog.getInstance().toggleLed()">&#x1F4A1;</a>
+        <a href="#" id="moveForwardLeft" onclick="Watchdog.getInstance().moveForwardLeft()">&nwarr; </a>
+        <a href="#" id="moveForward" onclick="Watchdog.getInstance().moveForward()">&uarr;</a>
+        <a href="#" id="moveForwardRight" onclick="Watchdog.getInstance().moveForwardRight()">&nearr; </a>
+        <a href="#" id="turnLeft" onclick="Watchdog.getInstance().turnLeft()">&larr;</a>
+        <a href="#" id="stop" onclick="Watchdog.getInstance().stop()">&#9940;</a>
+        <a href="#" id="turnRight" onclick="Watchdog.getInstance().turnRight()">&rarr;</a>
+        <a href="#" id="moveBackwardLeft" onclick="Watchdog.getInstance().moveBackwardLeft()">&swarr;</a>
+        <a href="#" id="moveBackward" onclick="Watchdog.getInstance().moveBackward()">&darr;</a>
+        <a href="#" id="moveBackwardRight" onclick="Watchdog.getInstance().moveBackwardRight()">&searr;</a>
+        <a href="#" id="getTemperature" onclick="Watchdog.getInstance().getTemperature()">&#x1f321;</a>
+        <a href="#" id="getSoundLevel" onclick="Watchdog.getInstance().getSoundLevel()">&#x1F3A4; </a>
     </div>
+    <div id="output"></div>
 
 </body>
 </html>
