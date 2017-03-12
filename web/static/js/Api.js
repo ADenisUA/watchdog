@@ -165,7 +165,7 @@ class Api {
         $.get("/api/listen", function (data) {
             Utils.callFunction(callback);
             console.log(data.data);
-            $("#output").html(data.data + $("#output").html());
+            $("#output").html($("#output").html() + data.data);
             _this.listen(callback);
         });
     }
