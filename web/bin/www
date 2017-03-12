@@ -7,7 +7,9 @@
 var app = require('../app');
 var debug = require('debug')('web:server');
 var http = require('http');
-//var https = require('https');
+var https = require('https');
+var pem = require('pem');
+var fs = require('fs');
 var httpProxy = require('http-proxy');
 //var VIDEO_STREAM_HOST = "http://192.168.31.45";
 var VIDEO_STREAM_HOST = "http://127.0.0.1";
@@ -21,11 +23,22 @@ var routes = [
   VIDEO_STREAM_HOST + ":" + VIDEO_STREAM_PORT
 ];
 
-var proxy = httpProxy.createProxyServer({});
-var proxyServer = http.createServer(function (req, res) {
-  var route=0;
+//pem.createCertificate({days:30, selfSigned:true}, function(err, keys) {
+
+const httpsOptions = {
+  key: fs.readFileSync('./key.pem'),
+  cert: fs.readFileSync('./cert.pem')
+}
+
+var proxy = httpProxy.createProxyServer(
+    {ssl: {
+      key: httpsOptions.key,
+      cert: httpsOptions.cert}});
+
+var proxyServer = https.createServer({key: httpsOptions.key, cert: httpsOptions.cert}, function (req, res) {
+  var route = 0;
   if (req.url.indexOf("stream/video.mjpeg") > -1) {
-      route=1;
+    route = 1;
   }
 
   proxy.web(req, res, {target: routes[route]});
@@ -88,8 +101,8 @@ function onError(error) {
   }
 
   var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+      ? 'Pipe ' + port
+      : 'Port ' + port;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
@@ -113,7 +126,8 @@ function onError(error) {
 function onListening() {
   var addr = server.address();
   var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
+      ? 'pipe ' + addr
+      : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
+//});

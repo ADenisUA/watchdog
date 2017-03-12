@@ -8,8 +8,7 @@ var router = express.Router();
 var BtSerial = require("../logic/BtSerial.js");
 var btSerial = new BtSerial();
 var admin = require("firebase-admin");
-
-const API_KEY = "AAAAxrPasrU:APA91bEjlPmxjpVTCn8ufsGZzFLesXNK0D9JSo7Vmbegrc7oBYd3eDgk_5W73whCuPC903CrgaT20rBQ3ZSMYDP6kuwx3r6wFk7-VlBu6B8JWzH-OsHCNEdxB9IyW_SeyfunG2jH67P_";
+var serviceAccount = require("../firebase.json");
 
 router.get('/connect', function(request, response) {
     btSerial.connect(function (result) {
@@ -56,8 +55,6 @@ router.get('/register', function(request, response) {
 
     response.status(200).json({status: "ok"});
 });
-
-var serviceAccount = require("../firebase.json");
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
