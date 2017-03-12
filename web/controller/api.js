@@ -70,9 +70,9 @@ function sendNotification(data) {
         var id = url.substring(url.lastIndexOf("/") + 1);
 
         admin.messaging().sendToDevice(id, {notification: {
-                    title: "Portugal vs. Denmark",
-                    body: "5 to 1"
-                }, data: {test: "test"}})
+                    title: "Watchdog notification",
+                    body: "Open a web page?"
+                }, data: data})
             .then(function (response) {
                 // See the MessagingDevicesResponse reference documentation for
                 // the contents of response.
