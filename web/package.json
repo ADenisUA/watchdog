@@ -14,7 +14,8 @@
     "morgan": "~1.7.0",
     "serve-favicon": "~2.3.2",
     "http-proxy": "~1.16.2",
-    "node-bluetooth": "~1.1.0",
-    "bluetooth-serial-port": "~2.1.1"
+    "bluetooth-serial-port": "~2.1.1",
+    "request": "~2.81.0",
+    "firebase-admin": "~4.1.3"
   }
 }

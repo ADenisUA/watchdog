@@ -25,7 +25,8 @@
 
 #streamingContainer a,
 #streamingContainer a:hover,
-#streamingContainer a:visited {
+#streamingContainer a:visited,
+button.js-push-button {
     text-decoration: none;
     font-size: 50px;
     width: 60px;
@@ -104,4 +105,13 @@
 #streamingContainer a#toggleStreaming {
     right: 10px;
     top: 10px;
+}
+
+button.js-push-button {
+    left: 250px;
+    bottom: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    width: 100px;
 }
