@@ -2,8 +2,9 @@
   "name": "Watchdog",
   "short_name": "Watchdog",
   "start_url": "/index.html",
-  "display": "standalone",
+  "display": "fullscreen",
   "lang": "en-US",
+  "orientation": "landscape",
   "background_color": "#fff",
   "description": "Watchdog guards your apartment",
   "icons": [{
