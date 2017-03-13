@@ -163,9 +163,18 @@ class Api {
     listen(callback) {
         var _this = this;
         $.get("/api/listen", function (data) {
-            Utils.callFunction(callback);
-            console.log(data.data);
-            $("#output").html($("#output").html() + data.data);
+            Utils.callFunction(callback, data);
+
+            if (data && data.data) {
+                var array = data.data.split("/n");
+                var result = "";
+                for (var i = array.length-1; i>=0; i--) {
+                    result += array[i] + "/n";
+                }
+                console.log(result);
+                $("#output").html(result + $("#output").html());
+            }
+
             _this.listen(callback);
         });
     }
