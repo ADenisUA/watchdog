@@ -166,13 +166,8 @@ class Api {
             Utils.callFunction(callback, data);
 
             if (data && data.data) {
-                var array = data.data.split("/n");
-                var result = "";
-                for (var i = array.length-1; i>=0; i--) {
-                    result += array[i] + "/n";
-                }
-                console.log(result);
-                $("#output").html(result + $("#output").html());
+                console.log(data.data);
+                $("#output").html(data.data);
             }
 
             _this.listen(callback);
