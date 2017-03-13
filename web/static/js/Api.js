@@ -143,7 +143,7 @@ class Api {
     }
 
     beep(callback) {
-        $.get("/api/write?content=beep+duration%3D500+frequency%3D1000", function () {
+        $.get("/api/write?content=beep+duration%3D250+frequency%3D1000", function () {
             Utils.callFunction(callback);
         });
     }
