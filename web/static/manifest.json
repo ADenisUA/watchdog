@@ -2,9 +2,9 @@
   "name": "Watchdog",
   "short_name": "Watchdog",
   "start_url": "/index.html",
-  "display": "fullscreen",
+  "display": "standalone",
   "lang": "en-US",
-  "orientation": "landscape",
+  "orientation": "portrait",
   "background_color": "#fff",
   "description": "Watchdog guards your apartment",
   "icons": [{
@@ -18,6 +18,10 @@
     }, {
       "src": "img/icon96.png",
       "sizes": "96x96",
+      "type": "image/png"
+    }, {
+      "src": "img/icon128.png",
+      "sizes": "128x128",
       "type": "image/png"
     }, {
       "src": "img/icon144.png",
