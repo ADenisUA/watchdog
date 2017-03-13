@@ -40,11 +40,13 @@
 #define EVENT_PROXIMITY                         "onProximity"
 #define EVENT_TEMPERATURE                       "onTemperature"
 #define EVENT_SOUND_LEVEL                       "onSoundLevel"
+#define EVENT_LIGHT_LEVEL                       "onLightLevel"
 
 //constants
 #define ANGLE_SENSITIVITY           5
 #define TEMPERATURE_THRESHOLD       1.00f
 #define SOUND_LEVEL_THRESHOLD       200.00f
+#define LIGHT_LEVEL_THRESHOLD       300
 
 #define SPEED_DEFAULT               100
 #define SPEED_FIND_LIGHT_DIRECTION  75
@@ -86,6 +88,7 @@ String lastCommand = "";
 long lastCommandTimeStamp = 0;
 float lastTemperature = -TEMPERATURE_THRESHOLD;
 float lastSoundLevel = -SOUND_LEVEL_THRESHOLD;
+uint16_t lastLightLevel = -LIGHT_LEVEL_THRESHOLD;
 
 long lastSensorUpdateTimeStamp = 0;
 
@@ -253,6 +256,7 @@ void executeAndStopUntilNewCommandWithDelay() {
 void runBackgroundProcesses() {
     checkTemperature();
     checkSoundLevel();
+    checkLightLevel();
 }
 
 void checkTemperature() {
@@ -272,6 +276,16 @@ void checkSoundLevel() {
     Serial.print(EVENT_SOUND_LEVEL);
     Serial.print(" soundLevel=");
     Serial.println(currentSoundLevel);   
+  }
+}
+
+void checkLightLevel() {
+  uint16_t currentLightLevel = getLightLevel();
+  if (!equalsWithinRange(lastLightLevel, currentLightLevel, LIGHT_LEVEL_THRESHOLD)) {
+    lastLightLevel = currentLightLevel;
+    Serial.print(EVENT_LIGHT_LEVEL);
+    Serial.print(" lightLevel=");
+    Serial.println(currentLightLevel);   
   }
 }
 

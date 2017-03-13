@@ -24,8 +24,8 @@ var routes = [
 ];
 
 const httpsOptions = {
-  key: fs.readFileSync('./key.pem'),
-  cert: fs.readFileSync('./cert.pem')
+  key: "",
+  cert: ""
 }
 
 var proxy = (useHttps) ? httpProxy.createProxyServer(
