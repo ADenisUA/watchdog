@@ -14,8 +14,7 @@ var httpProxy = require('http-proxy');
 var VIDEO_STREAM_HOST = "http://127.0.0.1";
 var VIDEO_STREAM_PORT = "3001";
 var APPLICATION_PORT = "3000";
-//var PROXY_PORT = 8080;
-var PROXY_PORT = 80;
+var PROXY_PORT = 8080;
 var useHttps = false;
 
 var routes = [
