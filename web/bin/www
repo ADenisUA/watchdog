@@ -146,7 +146,7 @@ if (isProduction) {
 
 
     // handles acme-challenge and redirects to https
-    httpServer =require('http').createServer(lex.middleware(require('redirect-https')({port: HTTPS_PORT}))).listen(HTTP_PORT, function () {
+    httpServer =require('http').createServer(lex.middleware(require('redirect-https')())).listen(HTTP_PORT, function () {
         console.log("Listening for ACME http-01 challenges on", this.address());
     });
 
