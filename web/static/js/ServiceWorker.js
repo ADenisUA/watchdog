@@ -11,7 +11,7 @@ self.addEventListener('push', function(event) {
 
     var title = 'Watchdog notification';
     var body = 'Open Watchdog?';
-    var icon = '/img/icon.png';
+    var icon = '/img/icon192.png';
     var tag = 'tag';
 
     event.waitUntil(
