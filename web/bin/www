@@ -13,119 +13,190 @@ var httpProxy = require('http-proxy');
 //var VIDEO_STREAM_HOST = "http://192.168.31.45";
 var VIDEO_STREAM_HOST = "http://127.0.0.1";
 var VIDEO_STREAM_PORT = "3001";
-var APPLICATION_PORT = "3000";
+var HTTP_PORT = 8080;
+var HTTPS_PORT = 8081;
+
 var PROXY_PORT = 8080;
-var useHttps = false;
 
-var routes = [
-  "http://127.0.0.1:"+APPLICATION_PORT,
-  VIDEO_STREAM_HOST + ":" + VIDEO_STREAM_PORT
-];
+var isProduction = false;
 
-const httpsOptions = {
-  key: "",
-  cert: ""
-}
-
-var proxy = (useHttps) ? httpProxy.createProxyServer(
-    {ssl: {
-      key: httpsOptions.key,
-      cert: httpsOptions.cert}}) : httpProxy.createProxyServer({});
-
-var handler = function (req, res) {
-  var route = 0;
-  if (req.url.indexOf("stream/video.mjpeg") > -1) {
-    route = 1;
-  }
-
-  proxy.web(req, res, {target: routes[route]});
-};
-
-var proxyServer = (useHttps) ? https.createServer({key: httpsOptions.key, cert: httpsOptions.cert}, handler) : http.createServer(handler);
-
-proxyServer.on('upgrade', function (req, socket, head) {
-  proxy.ws(req, socket, head, {target: routes[1]});
+process.argv.forEach(function (val, index, array) {
+    console.log(index + ': ' + val);
+    if (val == "isProduction=true") {
+        isProduction = true;
+    }
 });
 
-proxyServer.listen(PROXY_PORT, "127.0.0.1");
+app.set('port', HTTPS_PORT);
 
-/**
- * Get port from environment and store in Express.
- */
+var httpServer =  null;
+var httpsServer =  null;
 
-var port = normalizePort(process.env.PORT || APPLICATION_PORT);
-app.set('port', port);
+if (isProduction) {
+    // returns an instance of node-greenlock with additional helper methods
+    var lex = require('greenlock-express').create({
+        // set to https://acme-v01.api.letsencrypt.org/directory in production
+        server: 'staging'
 
-/**
- * Create HTTP server.
- */
+        // If you wish to replace the default plugins, you may do so here
+        //
+        , challenges: {'http-01': require('le-challenge-fs').create({webrootPath: '/tmp/acme-challenges'})}
+        , store: require('le-store-certbot').create({webrootPath: '/tmp/acme-challenges'})
 
-var server = http.createServer(app);
+        // You probably wouldn't need to replace the default sni handler
+        // See https://git.daplie.com/Daplie/le-sni-auto if you think you do
+        //, sni: require('le-sni-auto').create({})
 
-/**
- * Listen on provided port, on all network interfaces.
- */
+        , approveDomains: approveDomains
+    });
 
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
+    function approveDomains(opts, certs, cb) {
+        // This is where you check your database and associated
+        // email addresses with domains and agreements and such
 
-/**
- * Normalize a port into a number, string, or false.
- */
 
-function normalizePort(val) {
-  var port = parseInt(val, 10);
+        // The domains being approved for the first time are listed in opts.domains
+        // Certs being renewed are listed in certs.altnames
+        if (certs) {
+            opts.domains = certs.altnames;
+        }
+        else {
+            opts.email = 'adenisua@gmail.com';
+            opts.agreeTos = true;
+        }
 
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
+        // NOTE: you can also change other options such as `challengeType` and `challenge`
+        // opts.challengeType = 'http-01';
+        // opts.challenge = require('le-challenge-fs').create({});
 
-  if (port >= 0) {
-    // port number
-    return port;
-  }
+        cb(null, {options: opts, certs: certs});
+    };
 
-  return false;
+    // var routes = [
+    //   "http://127.0.0.1:"+HTTP_PORT,
+    //   VIDEO_STREAM_HOST + ":" + VIDEO_STREAM_PORT
+    // ];
+    //
+    // const httpsOptions = {
+    //   key: "",
+    //   cert: ""
+    // };
+    //
+    // var proxy = (useHttps) ? httpProxy.createProxyServer(
+    //     {ssl: {
+    //       key: httpsOptions.key,
+    //       cert: httpsOptions.cert}}) : httpProxy.createProxyServer({});
+    //
+    // var handler = function (req, res) {
+    //   var route = 0;
+    //   if (req.url.indexOf("stream/video.mjpeg") > -1) {
+    //     route = 1;
+    //   }
+    //
+    //   proxy.web(req, res, {target: routes[route]});
+    // };
+    //
+    // var proxyServer = (useHttps) ? https.createServer({key: httpsOptions.key, cert: httpsOptions.cert}, handler) : http.createServer(handler);
+    //
+    // proxyServer.on('upgrade', function (req, socket, head) {
+    //   proxy.ws(req, socket, head, {target: routes[1]});
+    // });
+    //
+    // proxyServer.listen(PROXY_PORT, "127.0.0.1");
+
+    /**
+     * Get port from environment and store in Express.
+     */
+
+    //var port = normalizePort(process.env.PORT || HTTPS_PORT);
+
+    // /**
+    //  * Create HTTP server.
+    //  */
+    //
+    // var server = http.createServer(app);
+    //
+    // /**
+    //  * Listen on provided port, on all network interfaces.
+    //  */
+    //
+    // server.listen(port);
+    // server.on('error', onError);
+    // server.on('listening', onListening);
+
+    /**
+     * Normalize a port into a number, string, or false.
+     */
+    //
+    // function normalizePort(val) {
+    //   var port = parseInt(val, 10);
+    //
+    //   if (isNaN(port)) {
+    //     // named pipe
+    //     return val;
+    //   }
+    //
+    //   if (port >= 0) {
+    //     // port number
+    //     return port;
+    //   }
+    //
+    //   return false;
+    // }
+
+
+    // handles acme-challenge and redirects to https
+    httpServer =require('http').createServer(lex.middleware(require('redirect-https')({port: HTTPS_PORT}))).listen(HTTP_PORT, function () {
+        console.log("Listening for ACME http-01 challenges on", this.address());
+    });
+
+    // handles your app
+    httpsServer = require('https').createServer(lex.httpsOptions, lex.middleware(app)).listen(HTTPS_PORT, function () {
+        console.log("Listening for ACME tls-sni-01 challenges and serve app on", this.address());
+    });
+} else {
+    httpsServer = https.createServer(require('localhost.daplie.me-certificates').create(), app);
+    httpsServer.listen(HTTPS_PORT);
+    httpsServer.on('error', function(error) {
+        onError(error, HTTPS_PORT);
+    });
+    httpsServer.on('listening', function() {
+        onListening(httpsServer);
+    });
+
+    httpServer = http.createServer(app);
+    httpServer.listen(HTTP_PORT);
+    httpServer.on('error', function(error) {
+        onError(error, HTTP_PORT);
+    });
+    httpServer.on('listening', function () {
+        onListening(httpServer);
+    });
 }
 
-/**
- * Event listener for HTTP server "error" event.
- */
-
-function onError(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
-
-  var bind = typeof port === 'string'
-      ? 'Pipe ' + port
-      : 'Port ' + port;
-
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
+function onError(error, port) {
+    if (error.syscall !== 'listen') {
+        throw error;
+    }
+    // handle specific listen errors with friendly messages
+    switch (error.code) {
+        case 'EACCES':
+            console.error(' requires elevated privileges');
+            process.exit(1);
+            break;
+        case 'EADDRINUSE':
+            console.error(' is already in use');
+            process.exit(1);
+            break;
+        default:
+            throw error;
+    }
 }
 
-/**
- * Event listener for HTTP server "listening" event.
- */
-
-function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string'
-      ? 'pipe ' + addr
-      : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+function onListening(server) {
+    var addr = server.address();
+    var bind = typeof addr === 'string'
+        ? 'pipe ' + addr
+        : 'port ' + addr.port;
+    debug('Listening on ' + bind);
 }
