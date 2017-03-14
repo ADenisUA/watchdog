@@ -13,8 +13,6 @@ var httpProxy = require('http-proxy');
 //var VIDEO_STREAM_HOST = "http://192.168.31.45";
 var VIDEO_STREAM_HOST = "http://127.0.0.1";
 var VIDEO_STREAM_PORT = "3001";
-var HTTP_PORT = 8080;
-var HTTPS_PORT = 8081;
 
 var PROXY_PORT = 8080;
 
@@ -33,6 +31,9 @@ var httpServer =  null;
 var httpsServer =  null;
 
 if (isProduction) {
+    var HTTP_PORT = 80;
+    var HTTPS_PORT = 443;
+
     // returns an instance of node-greenlock with additional helper methods
     var lex = require('greenlock-express').create({
         // set to https://acme-v01.api.letsencrypt.org/directory in production
@@ -155,6 +156,9 @@ if (isProduction) {
         console.log("Listening for ACME tls-sni-01 challenges and serve app on", this.address());
     });
 } else {
+    var HTTP_PORT = 8080;
+    var HTTPS_PORT = 8081;
+
     httpsServer = https.createServer(require('localhost.daplie.me-certificates').create(), app);
     httpsServer.listen(HTTPS_PORT);
     httpsServer.on('error', function(error) {
