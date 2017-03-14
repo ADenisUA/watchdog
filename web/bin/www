@@ -34,6 +34,10 @@ if (isProduction) {
     var HTTP_PORT = 80;
     var HTTPS_PORT = 443;
 
+    // These are the changes that I made:
+    //
+    //     sudo setcap 'cap_net_bind_service=+ep' /usr/local/bin/node
+
     var leStore = require('le-store-certbot').create({
         configDir: '~/letsencrypt/etc',          // or /etc/letsencrypt or wherever
         privkeyPath: ':configDir/live/:hostname/privkey.pem',          //
