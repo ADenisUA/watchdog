@@ -17,6 +17,9 @@
 #define COMMAND_BEEP                            "beep"
 #define COMMAND_GET_TEMPERATURE                 "getTemperature"
 #define COMMAND_GET_SOUND_LEVEL                 "getSoundLevel"
+#define COMMAND_SET_TEMPERATURE_THRESHOLD       "setTemperatureThreshold"
+#define COMMAND_SET_SOUND_LEVEL_THRESHOLD       "setSoundLevelThreshold"
+#define COMMAND_SET_LIGHT_LEVEL_THRESHOLD       "setLightLevelThreshold"
 
 #define COMMAND_STOP                            "stop"
 #define COMMAND_FIND_LIGHT                      "findLightDirection"
@@ -86,9 +89,14 @@ uint16_t previousObstacleProximity = 0;
 
 String lastCommand = "";
 long lastCommandTimeStamp = 0;
+
 float lastTemperature = -TEMPERATURE_THRESHOLD;
 float lastSoundLevel = -SOUND_LEVEL_THRESHOLD;
 uint16_t lastLightLevel = -LIGHT_LEVEL_THRESHOLD;
+
+float temperatureThreshold = TEMPERATURE_THRESHOLD;
+float soundLevelThreshold = SOUND_LEVEL_THRESHOLD;
+uint16_t lightLevelThreshold = LIGHT_LEVEL_THRESHOLD;
 
 long lastSensorUpdateTimeStamp = 0;
 
@@ -173,6 +181,18 @@ boolean processNonInterruptingCommand() {
 
     lastSoundLevel = -SOUND_LEVEL_THRESHOLD;
     checkSoundLevel();
+
+    isProcessed = true;
+  } else if (isCommand(COMMAND_SET_TEMPERATURE_THRESHOLD)) {
+    temperatureThreshold = getCommandParamValueInt(lastCommand, "threshold");
+
+    isProcessed = true;
+  } else if (isCommand(COMMAND_SET_SOUND_LEVEL_THRESHOLD)) {
+    soundLevelThreshold = getCommandParamValueInt(lastCommand, "threshold");
+
+    isProcessed = true;
+  } else if (isCommand(COMMAND_SET_LIGHT_LEVEL_THRESHOLD)) {
+    lightLevelThreshold = getCommandParamValueInt(lastCommand, "threshold");
 
     isProcessed = true;
   }

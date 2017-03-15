@@ -160,6 +160,30 @@ class Api {
         });
     }
 
+    getLightLevel(callback) {
+        $.get("/api/write?content=getLightLevel", function () {
+            Utils.callFunction(callback);
+        });
+    }
+
+    setTemperatureThreshold(threshold, callback) {
+        $.get("/api/write?content=setTemperatureThreshold="+threshold, function () {
+            Utils.callFunction(callback);
+        });
+    }
+
+    setSoundLevelThreshold(threshold, callback) {
+        $.get("/api/write?content=setSoundLevelThreshold="+threshold, function () {
+            Utils.callFunction(callback);
+        });
+    }
+
+    setLightLevelThreshold(threshold, callback) {
+        $.get("/api/write?content=setLightLevelThreshold="+threshold, function () {
+            Utils.callFunction(callback);
+        });
+    }
+
     listen(callback) {
         var _this = this;
         $.get("/api/listen", function (data) {

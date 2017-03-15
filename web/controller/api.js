@@ -69,8 +69,8 @@ function sendNotification(data) {
         var host = url.substring(0, url.lastIndexOf("/"));
         var id = url.substring(url.lastIndexOf("/") + 1);
 
-        if (data && (data.contains("onTemperature") || data.contains("onSoundLevel") || data.contains("onLightLevel"))) {
-
+        if (data && (data.indexOf("onTemperature") == 0 || data.indexOf("onSoundLevel") == 0 || data.indexOf("onLightLevel") == 0)) {
+            //we need to process only events
         } else {
             return;
         }
