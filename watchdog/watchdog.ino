@@ -17,6 +17,7 @@
 #define COMMAND_BEEP                            "beep"
 #define COMMAND_GET_TEMPERATURE                 "getTemperature"
 #define COMMAND_GET_SOUND_LEVEL                 "getSoundLevel"
+#define COMMAND_GET_LIGHT_LEVEL                 "getLightLevel"
 #define COMMAND_SET_TEMPERATURE_THRESHOLD       "setTemperatureThreshold"
 #define COMMAND_SET_SOUND_LEVEL_THRESHOLD       "setSoundLevelThreshold"
 #define COMMAND_SET_LIGHT_LEVEL_THRESHOLD       "setLightLevelThreshold"
@@ -173,14 +174,20 @@ boolean processNonInterruptingCommand() {
     isProcessed = true;
   } else if (isCommand(COMMAND_GET_TEMPERATURE)) {
 
-    lastTemperature = 0;
+    lastTemperature = -temperatureThreshold;
     checkTemperature();
 
     isProcessed = true;
   } else if (isCommand(COMMAND_GET_SOUND_LEVEL)) {
 
-    lastSoundLevel = -SOUND_LEVEL_THRESHOLD;
+    lastSoundLevel = -soundLevelThreshold;
     checkSoundLevel();
+
+    isProcessed = true;
+  } else if (isCommand(COMMAND_GET_LIGHT_LEVEL)) {
+
+    lastLightLevel = -lightLevelThreshold;
+    checkLightLevel();
 
     isProcessed = true;
   } else if (isCommand(COMMAND_SET_TEMPERATURE_THRESHOLD)) {

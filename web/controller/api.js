@@ -75,6 +75,8 @@ function sendNotification(data) {
             return;
         }
 
+        console.log("sendNotification", data);
+
         admin.messaging().sendToDevice(id, {notification: {
                     title: "Watchdog notification",
                     body: "Open a web page?"
