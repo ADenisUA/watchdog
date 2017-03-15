@@ -7,7 +7,7 @@ self.addEventListener('install', function(event) {
 });
 
 self.addEventListener('push', function(event) {
-    console.log('Received a push message', event, event.getData());
+    console.log('Received a push message', event, event.data);
 
     var title = 'Watchdog notification';
     var body = 'Open Watchdog?';
