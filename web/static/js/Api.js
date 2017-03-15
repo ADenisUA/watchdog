@@ -107,7 +107,7 @@ class Api {
 
     stopStreaming() {
         $("#streamingView").remove();
-        $("#streamingContainer").append('<img id="streamingView" src="/snapshot/snapshot.jpeg" width="100%" height="100%" />');
+        $("#streamingContainer").append('<img id="streamingView" src="/stream/snapshot.jpeg" width="100%" height="100%" />');
     }
 
     startStreaming() {
