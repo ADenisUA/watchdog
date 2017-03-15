@@ -106,11 +106,13 @@ class Api {
     }
 
     stopStreaming() {
-        $("#streamingView").attr("src", "/stream/snapshot.jpeg");
+        $("#streamingView").remove();
+        $("#streamingContainer").append('<img id="streamingView" src="/snapshot/snapshot.jpeg" width="100%" height="100%" />');
     }
 
     startStreaming() {
-        $("#streamingView").attr("src", "/stream/video.mjpeg");
+        $("#streamingView").remove();
+        $("#streamingContainer").append('<img id="streamingView" src="/stream/video.mjpeg" width="100%" height="100%" />');
     }
 
     toggleLed() {
