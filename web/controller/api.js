@@ -5,7 +5,7 @@
 var express = require("express");
 var request = require('request');
 var router = express.Router();
-var BtSerial = require("../logic/BtSerial.js");
+var BtSerial = require("../lib/BtSerial.js");
 var btSerial = new BtSerial();
 var admin = require("firebase-admin");
 var serviceAccount = require("../firebase.json");

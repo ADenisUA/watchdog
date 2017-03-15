@@ -1,10 +1,3 @@
-/**
- * Created by davdeev on 3/12/17.
- */
-
-self.addEventListener('install', function(event) {
-    console.log('Install', event);
-});
 
 self.addEventListener('push', function(event) {
     console.log('Received a push message', event, event.data);
@@ -28,6 +21,10 @@ self.addEventListener('push', function(event) {
             ]
         })
     );
+});
+
+self.addEventListener('install', function(event) {
+    console.log('Install', event);
 });
 
 self.addEventListener('notificationclick', function(event) {

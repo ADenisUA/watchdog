@@ -10,10 +10,6 @@ var http = require('http');
 var https = require('https');
 var fs = require('fs');
 var httpProxy = require('http-proxy');
-//var VIDEO_STREAM = "http://192.168.31.45:3001";
-var VIDEO_STREAM = "http://127.0.0.1:3001";
-
-var PROXY_PORT = 8080;
 
 var isProduction = false;
 
@@ -32,6 +28,7 @@ var httpsServer =  null;
 if (isProduction) {
     var HTTP_PORT = 80;
     var HTTPS_PORT = 443;
+    var VIDEO_STREAM = "http://127.0.0.1:3001";
 
     // These are the changes that I made:
     //
@@ -182,11 +179,12 @@ if (isProduction) {
 } else {
     var HTTP_PORT = 8080;
     var HTTPS_PORT = 8081;
+    var VIDEO_STREAM = "http://192.168.31.45:3001";
 
     var httpsOptions = require('localhost.daplie.me-certificates').create();
     var proxy = httpProxy.createProxyServer({ssl: httpsOptions});
     var handler = function (req, res) {
-      if (req.url.indexOf("stream/video.mjpeg") > -1) {
+      if (req.url.indexOf("stream/") > -1) {
           proxy.web(req, res, {target: VIDEO_STREAM});
       } else {
           app(req, res);
@@ -202,7 +200,7 @@ if (isProduction) {
         onListening(httpsServer);
     });
 
-    httpServer = http.createServer(app);
+    httpServer = http.createServer(handler);
     httpServer.listen(HTTP_PORT);
     httpServer.on('error', function(error) {
         onError(error, HTTP_PORT);

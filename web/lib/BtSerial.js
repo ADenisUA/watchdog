@@ -2,7 +2,6 @@
 
 var btSerial = new (require('bluetooth-serial-port')).BluetoothSerialPort();
 
-
 var BtSerial = module.exports = function BtSerial() {
     var _this = this;
     var _listenCallback = null;
