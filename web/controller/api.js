@@ -69,6 +69,12 @@ function sendNotification(data) {
         var host = url.substring(0, url.lastIndexOf("/"));
         var id = url.substring(url.lastIndexOf("/") + 1);
 
+        if (data && (data.contains("onTemperature") || data.contains("onSoundLevel") || data.contains("onLightLevel"))) {
+
+        } else {
+            return;
+        }
+
         admin.messaging().sendToDevice(id, {notification: {
                     title: "Watchdog notification",
                     body: "Open a web page?"
@@ -82,7 +88,6 @@ function sendNotification(data) {
                 console.log("Error sending message:", error);
             });
     }
-
 }
 
 module.exports = router;
