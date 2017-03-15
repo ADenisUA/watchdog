@@ -110,7 +110,7 @@ class Api {
     }
 
     startStreaming() {
-        $("#streamingView").attr("src", "/stream/snapshot.mjpeg");
+        $("#streamingView").attr("src", "/stream/video.mjpeg");
     }
 
     toggleLed() {
