@@ -169,19 +169,19 @@ class Api {
     }
 
     setTemperatureThreshold(threshold, callback) {
-        $.get("/api/write?content=setTemperatureThreshold%3D"+threshold, function () {
+        $.get("/api/write?content=setTemperatureThreshold+threshold%3D"+threshold, function () {
             Utils.callFunction(callback);
         });
     }
 
     setSoundLevelThreshold(threshold, callback) {
-        $.get("/api/write?content=setSoundLevelThreshold%3D"+threshold, function () {
+        $.get("/api/write?content=setSoundLevelThreshold+threshold%3D"+threshold, function () {
             Utils.callFunction(callback);
         });
     }
 
     setLightLevelThreshold(threshold, callback) {
-        $.get("/api/write?content=setLightLevelThreshold%3D"+threshold, function () {
+        $.get("/api/write?content=setLightLevelThreshold+threshold%3D"+threshold, function () {
             Utils.callFunction(callback);
         });
     }
