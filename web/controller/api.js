@@ -87,7 +87,7 @@ function sendNotification(data) {
             return;
         }
 
-        console.log("sendNotification", data);
+        console.log("sendNotification", payload);
 
         admin.messaging().sendToDevice(id, {notification: {
                     title: "Watchdog notification",
