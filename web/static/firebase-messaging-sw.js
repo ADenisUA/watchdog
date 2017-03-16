@@ -7,7 +7,7 @@ self.addEventListener('push', function(event) {
     if (event.data && event.data.json() && event.data.json().data && event.data.json().data.payload) {
 
         try {
-            var payload = event.data.json().data.payload;
+            var payload = JSON.parse(event.data.json().data.payload);
             for (var i in payload) {
                 body += payload[i].name;
                 body += "=";
