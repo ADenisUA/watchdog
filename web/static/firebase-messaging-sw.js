@@ -1,13 +1,13 @@
 
 self.addEventListener('push', function(event) {
-    console.log('Received a push message', event.data);
+    console.log('Received a push message', event.data.json());
 
     var body = "";
 
-    if (event.data && event.data.payload) {
+    if (event.data && event.data.json() && event.data.json().payload) {
 
         try {
-            var payload = JSON.parse(event.data.payload);
+            var payload = JSON.parse(event.data.json().payload);
             body += payload.name;
             body += "=";
             body += payload.value;
