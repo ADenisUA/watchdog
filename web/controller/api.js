@@ -68,18 +68,21 @@ function sendNotification(data) {
         // Set up the request
         var host = url.substring(0, url.lastIndexOf("/"));
         var id = url.substring(url.lastIndexOf("/") + 1);
-        var payload = [];
+        var payload = "";
 
         if (data && (data.indexOf("\"event\"") > -1)) {
             //we need to process only events
 
             var rows = data.match(/[^\r\n]+/g);
+            payload = "[";
 
             for (var i in rows) {
                 if (rows[i].indexOf("\"event\"") > -1) {
-                    payload.push(JSON.parse(rows[i]));
+                    payload += rows[i];
                 }
             }
+
+            payload = "]";
         } else {
             return;
         }
