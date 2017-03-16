@@ -73,7 +73,7 @@ function sendNotification(data) {
         if (data && (data.indexOf("\"event\"") > -1)) {
             //we need to process only events
 
-            var rows = data.split("/n");
+            var rows = data.match(/[^\r\n]+/g);
 
             for (var i in rows) {
                 if (rows[i].indexOf("\"event\"") > -1) {

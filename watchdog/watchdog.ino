@@ -290,7 +290,6 @@ void checkTemperature() {
   float currentTemperature = getTemperature();
   if (!equalsWithinRange(lastTemperature, currentTemperature, TEMPERATURE_THRESHOLD)) {
     lastTemperature = currentTemperature;
-    Serial.println("");
     Serial.println(generateEventJson(EVENT_TEMPERATURE, "temperature", currentTemperature));
   }
 }
@@ -299,7 +298,6 @@ void checkSoundLevel() {
   float currentSoundLevel = getSoundLevel();
   if (!equalsWithinRange(lastSoundLevel, currentSoundLevel, SOUND_LEVEL_THRESHOLD)) {
     lastSoundLevel = currentSoundLevel;
-    Serial.println(""); 
     Serial.println(generateEventJson(EVENT_SOUND_LEVEL, "soundLevel", currentSoundLevel));
   }
 }
@@ -308,7 +306,6 @@ void checkLightLevel() {
   uint16_t currentLightLevel = getLightLevel();
   if (!equalsWithinRange(lastLightLevel, currentLightLevel, LIGHT_LEVEL_THRESHOLD)) {
     lastLightLevel = currentLightLevel;
-    Serial.println("");
     Serial.println(generateEventJson(EVENT_LIGHT_LEVEL, "lightLevel", currentLightLevel));   
   }
 }
