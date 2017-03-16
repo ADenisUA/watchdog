@@ -1,9 +1,24 @@
 
 self.addEventListener('push', function(event) {
-    console.log('Received a push message', event, event.data);
+    console.log('Received a push message', event.data);
 
+    var body = "";
+
+    if (event.data && event.data.payload) {
+
+        try {
+            var payload = JSON.parse(event.data.payload);
+            body += payload.name;
+            body += "=";
+            body += payload.value;
+        } catch (e) {
+            body += "Unable to parse event";
+        }
+    }
+
+    body += ". open Watchdog?";
     var title = 'Watchdog notification';
-    var body = 'Open Watchdog?';
+
     var icon = '/img/icon192.png';
     var image = '/stream/snapshot.jpeg';
     var tag = 'tag';

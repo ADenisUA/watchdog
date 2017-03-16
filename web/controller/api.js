@@ -80,7 +80,7 @@ function sendNotification(data) {
         admin.messaging().sendToDevice(id, {notification: {
                     title: "Watchdog notification",
                     body: "Open a web page?"
-                }, data: {log: data}})
+                }, data: {payload: data}})
             .then(function (response) {
                 // See the MessagingDevicesResponse reference documentation for
                 // the contents of response.
