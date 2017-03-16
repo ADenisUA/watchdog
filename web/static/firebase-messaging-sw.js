@@ -4,19 +4,22 @@ self.addEventListener('push', function(event) {
 
     var body = "";
 
-    if (event.data && event.data.json() && event.data.json().payload) {
+    if (event.data && event.data.json() && event.data.json().data && event.data.json().data.payload) {
 
         try {
-            var payload = JSON.parse(event.data.json().payload);
-            body += payload.name;
-            body += "=";
-            body += payload.value;
+            var payload = event.data.json().data.payload;
+            for (var i in payload) {
+                body += payload[i].name;
+                body += "=";
+                body += payload[i].value;
+                body += "."
+            }
         } catch (e) {
             body += "Unable to parse event";
         }
     }
 
-    body += ". open Watchdog?";
+    body += " Open Watchdog?";
     var title = 'Watchdog notification';
 
     var icon = '/img/icon192.png';
