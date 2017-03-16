@@ -68,9 +68,18 @@ function sendNotification(data) {
         // Set up the request
         var host = url.substring(0, url.lastIndexOf("/"));
         var id = url.substring(url.lastIndexOf("/") + 1);
+        var payload = [];
 
-        if (data && (data.indexOf("onTemperature") > -1 || data.indexOf("onSoundLevel") > -1 || data.indexOf("onLightLevel") > -1)) {
+        if (data && (data.indexOf("\"event\"") > -1)) {
             //we need to process only events
+
+            var rows = data.split("/n");
+
+            for (var i in rows) {
+                if (rows[i].indexOf("\"event\"") > -1) {
+                    payload.push(JSON.parse(rows[i]));
+                }
+            }
         } else {
             return;
         }
@@ -80,7 +89,7 @@ function sendNotification(data) {
         admin.messaging().sendToDevice(id, {notification: {
                     title: "Watchdog notification",
                     body: "Open a web page?"
-                }, data: {payload: data}})
+                }, data: {payload: payload}})
             .then(function (response) {
                 // See the MessagingDevicesResponse reference documentation for
                 // the contents of response.
