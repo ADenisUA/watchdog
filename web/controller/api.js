@@ -82,7 +82,7 @@ function sendNotification(data) {
                 }
             }
 
-            payload = "]";
+            payload += "]";
         } else {
             return;
         }
