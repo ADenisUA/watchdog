@@ -4,7 +4,7 @@ let instance;
 
 const TEMPERATURE_THRESHOLD = 1;
 const SOUND_LEVEL_THRESHOLD = 200;
-const LIGHT_LEVEL_THRESHOLD = 300;
+const LIGHT_LEVEL_THRESHOLD = 200;
 
 class Watchdog {
 
@@ -22,6 +22,8 @@ class Watchdog {
         if (!instance) {
             instance = new Watchdog();
             instance.getApi().listen();
+            instance.getApi().setLightLevelThreshold(LIGHT_LEVEL_THRESHOLD);
+
             // instance.getApi().setTemperatureThreshold(TEMPERATURE_THRESHOLD, function () {
             //     instance.getApi().setSoundLevelThreshold(SOUND_LEVEL_THRESHOLD, function () {
             //         instance.getApi().setLightLevelThreshold(LIGHT_LEVEL_THRESHOLD);
