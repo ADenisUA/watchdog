@@ -1,5 +1,6 @@
 #!/bin/bash
 sleep 8
+/usr/bin/tvservice -o
 cd /home/pi/Watchdog/watchdog/web
 sudo nohup node ./bin/www isProduction=true > ./output.log 2> error.log &
 sleep 10
