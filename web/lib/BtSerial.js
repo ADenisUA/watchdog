@@ -100,7 +100,7 @@ var BtSerial = module.exports = function BtSerial() {
                 btSerial.connect(address, channel, function () {
                     console.log("Connected to BT device", name, address);
 
-                    _this.write("setTimestamp timestamp="+(Math.round(new Date().getTime()/1000)), callback);
+                    _write("setTimestamp timestamp="+(Math.round(new Date().getTime()/1000)), callback);
                 }, function() {
                     console.log(RESULT_ERROR_CONNECTION_FAILURE, name, address);
                     if (callback) callback(RESULT_ERROR_CONNECTION_FAILURE);
@@ -119,6 +119,15 @@ var BtSerial = module.exports = function BtSerial() {
     var _write = function (content, callback) {
 
         console.log("Attempting to write", content);
+
+        if (_writeIsInProgress) {
+            console.log("writeIsInProgress. Pushing request to the queue");
+            _writeQueue.push({content: content, callback: callback});
+            return;
+        } else {
+            _writeIsInProgress = true;
+            _lastCommand = content;
+        }
 
         btSerial.write(new Buffer(content, 'utf-8'), function(error, bytesWritten) {
             if (error) {
@@ -139,16 +148,6 @@ var BtSerial = module.exports = function BtSerial() {
     }
 
     this.write = function(content, callback) {
-
-        if (_writeIsInProgress) {
-            console.log("writeIsInProgress. Pushing request to the queue");
-            _writeQueue.push({content: content, callback: callback});
-            return;
-        } else {
-            _writeIsInProgress = true;
-            _lastCommand = content;
-        }
-
         if (!btSerial.isOpen()) {
             console.log("BT connection is closed. Reconnecting");
 
