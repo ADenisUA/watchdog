@@ -13,7 +13,7 @@ self.addEventListener('push', function(event) {
                 body += "=";
                 body += payload[i].value;
                 body += " on ";
-                body += new Date(payload[i].timestamp);
+                body += new Date(payload[i].timestamp*1000);
                 body += "."
             }
         } catch (e) {

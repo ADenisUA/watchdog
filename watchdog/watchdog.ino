@@ -205,8 +205,10 @@ boolean processNonInterruptingCommand() {
 
     isProcessed = true;
   } else if (isCommand(COMMAND_SET_TIMESTAMP)) {
+    long timestamp = getCommandParamValueLong(lastCommand, "timestamp");
+    Serial.println(timestamp);
     baseTimestamp = getCommandParamValueLong(lastCommand, "timestamp") - millis();
-
+    Serial.println(baseTimestamp);
     isProcessed = true;
   }
 
@@ -326,7 +328,7 @@ String generateEventJson(String eventName, String propertyName, float propertyVa
   json += "\",\"value\":\"";
   json += propertyValue;
   json += "\",\"timestamp\":";
-  json += baseTimestamp + millis();
+  json += baseTimestamp + millis()/1000;
   json += "}";
   return json;
 }
