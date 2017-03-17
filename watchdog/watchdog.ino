@@ -211,6 +211,8 @@ boolean processNonInterruptingCommand() {
   }
 
   if (isProcessed) {
+    Serial.print("Processed command: ");
+    Serial.println(lastCommand);
     lastCommand = "";
   }
 
