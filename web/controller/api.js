@@ -10,9 +10,25 @@ var btSerial = new BtSerial();
 var admin = require("firebase-admin");
 var serviceAccount = require("../firebase.json");
 
-btSerial.connect();
-
 const RESULT_OK = "OK";
+
+var _listenData = "";
+var _lastResponse = null;
+
+btSerial.connect(function (result) {
+    if (result == RESULT_OK) {
+        btSerial.listen(function (data) {
+            _listenData += data;
+
+            sendNotification(data);
+
+            if (_lastResponse && !_lastResponse.finished) {
+                _lastResponse.status(200).json({data: _listenData});
+                _listenData = "";
+            }
+        });
+    }
+});
 
 router.get('/write', function(request, response) {
     var content = request.param("content");
@@ -22,19 +38,8 @@ router.get('/write', function(request, response) {
     });
 });
 
-var listenData = "";
-
 router.get('/listen', function(request, response) {
-    btSerial.listen(function (data) {
-        listenData += data;
-
-        sendNotification(data);
-
-        if (!response.finished) {
-            response.status(200).json({data: listenData});
-            listenData = "";
-        }
-    });
+    _lastResponse = response;
 });
 
 var notificationUrls = new Array();
