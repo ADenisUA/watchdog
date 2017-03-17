@@ -93,12 +93,12 @@ var BtSerial = module.exports = function BtSerial() {
 
                 // make bluetooth connect to remote device
                 btSerial.connect(address, channel, function () {
-                    console.log('Connected to BT device ', name, address);
+                    console.log("Connected to BT device", name, address);
 
-                    _write("setTimestamp timestamp="+(new Date().getTime()/1000), function () {
+                    _write("setTimestamp timestamp="+(Math.round(new Date().getTime()/1000)), function () {
                         setTimeout(function () {
                             if (callback) callback(RESULT_OK);
-                        }, 3000);
+                        }, 1000);
                     });
                 }, function() {
                     console.log(RESULT_ERROR_CONNECTION_FAILURE, name, address);
