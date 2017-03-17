@@ -29,6 +29,9 @@ var BtSerial = module.exports = function BtSerial() {
     btSerial.on('data', function(buffer) {
         var data = buffer.toString('utf-8');
         console.log("Received data:", data);
+        if (_lastCommand) {
+            console.log(_lastCommand.content);
+        }
         if (_lastCommand && data.indexOf(_lastCommand.content) > -1) {
             _lastCommand = null;
             _writeIsInProgress = false;
