@@ -153,10 +153,10 @@ boolean processNonInterruptingCommand() {
   boolean isProcessed = false;
   
   if (isCommand(COMMAND_LED)) {
-    int index = getCommandParamValueInt(lastCommand, "index");
-    int r = getCommandParamValueInt(lastCommand, "r");
-    int g = getCommandParamValueInt(lastCommand, "g");
-    int b = getCommandParamValueInt(lastCommand, "b");
+    int index = getCommandParamValueLong(lastCommand, "index");
+    int r = getCommandParamValueLong(lastCommand, "r");
+    int g = getCommandParamValueLong(lastCommand, "g");
+    int b = getCommandParamValueLong(lastCommand, "b");
 
     if (index > -1) {
       led.setColorAt(index,r,g,b);
@@ -168,8 +168,8 @@ boolean processNonInterruptingCommand() {
     isProcessed = true;
   } else if (isCommand(COMMAND_BEEP)) {
 
-    int frequency = getCommandParamValueInt(lastCommand, "frequency");
-    int duration = getCommandParamValueInt(lastCommand, "duration");
+    int frequency = getCommandParamValueLong(lastCommand, "frequency");
+    int duration = getCommandParamValueLong(lastCommand, "duration");
     
     buzzer.tone(frequency, duration);
 
@@ -193,19 +193,19 @@ boolean processNonInterruptingCommand() {
 
     isProcessed = true;
   } else if (isCommand(COMMAND_SET_TEMPERATURE_THRESHOLD)) {
-    temperatureThreshold = getCommandParamValueInt(lastCommand, "threshold");
+    temperatureThreshold = getCommandParamValueLong(lastCommand, "threshold");
 
     isProcessed = true;
   } else if (isCommand(COMMAND_SET_SOUND_LEVEL_THRESHOLD)) {
-    soundLevelThreshold = getCommandParamValueInt(lastCommand, "threshold");
+    soundLevelThreshold = getCommandParamValueLong(lastCommand, "threshold");
 
     isProcessed = true;
   } else if (isCommand(COMMAND_SET_LIGHT_LEVEL_THRESHOLD)) {
-    lightLevelThreshold = getCommandParamValueInt(lastCommand, "threshold");
+    lightLevelThreshold = getCommandParamValueLong(lastCommand, "threshold");
 
     isProcessed = true;
   } else if (isCommand(COMMAND_SET_TIMESTAMP)) {
-    baseTimestamp = getCommandParamValueInt(lastCommand, "timestamp") - millis();
+    baseTimestamp = getCommandParamValueLong(lastCommand, "timestamp") - millis();
 
     isProcessed = true;
   }
@@ -840,7 +840,7 @@ String getCommandParamValue(String command, String paramName) {
   return paramValue;
 }
 
-int getCommandParamValueInt(String command, String paramName) {
+long getCommandParamValueLong(String command, String paramName) {
   String paramValue = getCommandParamValue(command, paramName);
   return (paramValue.length() > 0) ? paramValue.toInt() : -1;
 }
