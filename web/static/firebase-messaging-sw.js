@@ -12,8 +12,8 @@ self.addEventListener('push', function(event) {
                 body += payload[i].name;
                 body += "=";
                 body += payload[i].value;
-                body += " on ";
-                body += new Date(payload[i].timestamp);
+                // body += " on ";
+                // body += new Date(payload[i].timestamp);
                 body += "."
             }
         } catch (e) {
