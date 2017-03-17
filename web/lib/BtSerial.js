@@ -129,7 +129,7 @@ var BtSerial = module.exports = function BtSerial() {
             return;
         } else {
             _writeIsInProgress = true;
-            _lastCommand = content;
+            _lastCommand = new String(content);
         }
 
         btSerial.write(new Buffer(content, 'utf-8'), function(error, bytesWritten) {
