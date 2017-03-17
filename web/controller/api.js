@@ -26,9 +26,10 @@ router.get('/listen', function(request, response) {
     btSerial.listen(function (data) {
         listenData += data;
 
+        sendNotification(data);
+
         if (!response.finished) {
             response.status(200).json({data: listenData});
-            sendNotification(listenData);
             listenData = "";
         }
     });
