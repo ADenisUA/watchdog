@@ -96,7 +96,9 @@ var BtSerial = module.exports = function BtSerial() {
                     console.log('Connected to BT device ', name, address);
 
                     _write("setTimestamp timestamp="+(new Date().getTime()), function () {
-                        setTimeout(callback, 3000);
+                        setTimeout(function () {
+                            if (callback) callback(RESULT_OK);
+                        }, 3000);
                     });
                 }, function() {
                     console.log(RESULT_ERROR_CONNECTION_FAILURE, name, address);
