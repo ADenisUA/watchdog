@@ -28,7 +28,7 @@ var BtSerial = module.exports = function BtSerial() {
 
     btSerial.on('data', function(buffer) {
         var data = buffer.toString('utf-8');
-        console.log("Received data", data);
+        console.log("Received data:", data);
         if (_lastCommand && data.indexOf(_lastCommand) > -1) {
             _lastCommand = null;
             _writeIsInProgress = false;
@@ -141,9 +141,11 @@ var BtSerial = module.exports = function BtSerial() {
     };
 
     var _processNextWriteQueueElement = function () {
+        console.log("_processNextWriteQueueElement", _writeQueue.size);
         if (_writeQueue.size > 0) {
             var nextCommand = _writeQueue.shift();
-            _this.write(nextCommand.content, nextCommand.callback);
+            console.log("nextCommand", nextCommand);
+            _write(nextCommand.content, nextCommand.callback);
         }
     }
 
