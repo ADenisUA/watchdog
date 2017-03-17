@@ -4,7 +4,7 @@ let instance;
 
 const TEMPERATURE_THRESHOLD = 1;
 const SOUND_LEVEL_THRESHOLD = 200;
-const LIGHT_LEVEL_THRESHOLD = 200;
+const LIGHT_LEVEL_THRESHOLD = 300;
 
 class Watchdog {
 
