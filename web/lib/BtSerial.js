@@ -96,9 +96,7 @@ var BtSerial = module.exports = function BtSerial() {
                     console.log("Connected to BT device", name, address);
 
                     _write("setTimestamp timestamp="+(Math.round(new Date().getTime()/1000)), function () {
-                        setTimeout(function () {
-                            if (callback) callback(RESULT_OK);
-                        }, 1000);
+                        if (callback) callback(RESULT_OK);
                     });
                 }, function() {
                     console.log(RESULT_ERROR_CONNECTION_FAILURE, name, address);
@@ -115,7 +113,7 @@ var BtSerial = module.exports = function BtSerial() {
 
         console.log("Attempting to write", content);
 
-        btSerial.write(new Buffer(content, 'utf-8'), function(error, bytesWritten) {
+        btSerial.write(new Buffer(content + "/n", 'utf-8'), function(error, bytesWritten) {
             if (error) {
                 console.log(error);
                 if (callback) callback(RESULT_ERROR_WRITE_ERROR);
