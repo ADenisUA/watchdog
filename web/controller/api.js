@@ -82,7 +82,7 @@ function sendNotification(data) {
 
         admin.messaging().sendToDevice(id, {notification: {
                     title: "Watchdog",
-                    body: "Open application?"
+                    body: ""
                 }, data: {payload: payload}})
             .then(function (response) {
                 // See the MessagingDevicesResponse reference documentation for

@@ -207,7 +207,7 @@ boolean processNonInterruptingCommand() {
   } else if (isCommand(COMMAND_SET_TIMESTAMP)) {
     long timestamp = getCommandParamValueLong(lastCommand, "timestamp");
     Serial.println(timestamp);
-    baseTimestamp = getCommandParamValueLong(lastCommand, "timestamp") - millis();
+    baseTimestamp = getCommandParamValueLong(lastCommand, "timestamp") - millis()/1000;
     Serial.println(baseTimestamp);
     isProcessed = true;
   }

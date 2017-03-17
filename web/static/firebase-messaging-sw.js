@@ -13,7 +13,7 @@ self.addEventListener('push', function(event) {
                 body += "=";
                 body += payload[i].value;
                 body += " on ";
-                body += new Date(payload[i].timestamp*1000);
+                body += new Date(payload[i].timestamp*1000).toLocaleString();
                 body += "."
             }
         } catch (e) {
@@ -21,7 +21,6 @@ self.addEventListener('push', function(event) {
         }
     }
 
-    body += " Open application?";
     var title = "Watchdog";
 
     var icon = "/img/icon192.png";
@@ -36,8 +35,8 @@ self.addEventListener('push', function(event) {
             "vibrate": [300, 100, 400],
             "tag": tag,
             "actions": [
-                { "action": "yes", "title": "Yes"},
-                { "action": "no", "title": "No"}
+                { "action": "Show", "title": "Show"},
+                { "action": "Cancel", "title": "Cancel"}
             ]
         })
     );
@@ -51,7 +50,7 @@ self.addEventListener('notificationclick', function(event) {
     console.log('On notification click: ', event);
 
     switch (event.action) {
-        case "yes":
+        case "Show":
             // This looks to see if the current is already open and
             // focuses if it is
             event.waitUntil(
@@ -70,7 +69,7 @@ self.addEventListener('notificationclick', function(event) {
                     })
             );
             break;
-        case "no":
+        case "Cancel":
             break;
     }
 
