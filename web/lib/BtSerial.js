@@ -8,6 +8,11 @@ var BtSerial = module.exports = function BtSerial() {
     const DEVICE_NAME = "Makeblock";
     const DEVICE_ADDRESS = "00:0D:19:70:12:2C";
 
+    const RESULT_ERROR_BAD_CHANNEL = "Bad channel";
+    const RESULT_ERROR_CONNECTION_FAILURE = "Unable to connect";
+    const RESULT_ERROR_WRITE_ERROR = "Write error";
+    const RESULT_OK = "OK";
+
     // btSerial.on('found', function found(address, name){
     //     console.log('Discovered BT device ' + name + ' ' + address);
     //
@@ -81,45 +86,59 @@ var BtSerial = module.exports = function BtSerial() {
                 console.log('Found BT COM channel for serial port on %s: ', name, address, channel);
 
                 if (channel < 0) {
-                    console.log("BT channel is " + channel + ". Retrying", name, address);
-                    setTimeout(function() {
-                        _this.connect(callback);
-                    }, 3000);
+                    console.log(RESULT_ERROR_BAD_CHANNEL, channel);
+                    if (callback) callback(RESULT_ERROR_BAD_CHANNEL);
                     return;
                 }
 
                 // make bluetooth connect to remote device
                 btSerial.connect(address, channel, function () {
                     console.log('Connected to BT device ', name, address);
-                    if (callback) callback();
+
+                    _write("setTimestamp timestamp="+(new Date().getTime()));
+
+                    if (callback) callback(RESULT_OK);
 
                 }, function() {
-                    console.log('Unable to connect to BT device. Retrying', name, address);
-                    setTimeout(function() {
-                        _this.connect(callback);
-                    }, 3000);
+                    console.log(RESULT_ERROR_CONNECTION_FAILURE, name, address);
+                    if (callback) callback(RESULT_ERROR_CONNECTION_FAILURE);
                 });
 
             });
             return true;
         }
         return false;
+    };
+
+    var _write = function (content, callback) {
+
+        console.log("Attempting to write", content);
+
+        btSerial.write(new Buffer(content, 'utf-8'), function(error, bytesWritten) {
+            if (error) {
+                console.log(error);
+                if (callback) callback(RESULT_ERROR_WRITE_ERROR);
+            } else {
+                console.log("Written", content);
+                if (callback) callback(RESULT_OK);
+            }
+        });
     }
 
     this.write = function(content, callback) {
         if (!btSerial.isOpen()) {
+
             console.log("BT connection is closed. Reconnecting");
-            _this.connect(function () {
-                btSerial.write(new Buffer(content, 'utf-8'), function(error, bytesWritten) {
-                    if (error) console.log(error);
-                    if (callback) callback();
-                });
+
+            _this.connect(function (result) {
+                if (result == RESULT_OK) {
+                    _write(content, callback);
+                } else {
+                    if (callback) callback(result);
+                }
             });
         } else {
-            btSerial.write(new Buffer(content, 'utf-8'), function(error, bytesWritten) {
-                if (error) console.log(error);
-                if (callback) callback();
-            });
+            _write(content, callback);
         }
     };
 

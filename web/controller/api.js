@@ -10,22 +10,13 @@ var btSerial = new BtSerial();
 var admin = require("firebase-admin");
 var serviceAccount = require("../firebase.json");
 
-router.get('/connect', function(request, response) {
-    btSerial.connect(function (result) {
-        //response.status(404).json({status: "error"});
-        response.json(result);
-    });
-});
+const RESULT_OK = "OK";
 
 router.get('/write', function(request, response) {
     var content = request.param("content");
 
-    console.log("attempting to write: "+ content);
-
     btSerial.write(content, function (result) {
-        //response.status(404).json({status: "error"});
-        console.log("written: "+ content);
-        response.status(200).json({status: "ok"});
+        response.status((result == RESULT_OK) ? 200 : 500).json({status: result});
     });
 });
 
@@ -53,7 +44,7 @@ router.get('/register', function(request, response) {
         notificationUrls.push(url);
     }
 
-    response.status(200).json({status: "ok"});
+    response.status(200).json({status: "OK"});
 });
 
 admin.initializeApp({
