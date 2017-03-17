@@ -29,6 +29,11 @@ var BtSerial = module.exports = function BtSerial() {
     btSerial.on('data', function(buffer) {
         var data = buffer.toString('utf-8');
         console.log(data);
+        if (_lastCommand && data.indexOf(_lastCommand) > -1) {
+            _lastCommand = null;
+            _writeIsInProgress = false;
+            _processNextWriteQueueElement();
+        }
         if (_listenCallback) _listenCallback(data);
     });
 
@@ -109,11 +114,15 @@ var BtSerial = module.exports = function BtSerial() {
         return false;
     };
 
+    var _writeQueue = new Array();
+    var _writeIsInProgress = false;
+    var _lastCommand = null;
+
     var _write = function (content, callback) {
 
         console.log("Attempting to write", content);
 
-        btSerial.write(new Buffer(content + "/n", 'utf-8'), function(error, bytesWritten) {
+        btSerial.write(new Buffer(content, 'utf-8'), function(error, bytesWritten) {
             if (error) {
                 console.log(error);
                 if (callback) callback(RESULT_ERROR_WRITE_ERROR);
@@ -122,11 +131,25 @@ var BtSerial = module.exports = function BtSerial() {
                 if (callback) callback(RESULT_OK);
             }
         });
+    };
+
+    var _processNextWriteQueueElement = function () {
+        if (_writeQueue.size > 0) {
+            var nextCommand = _writeQueue.shift();
+            _this.write(nextCommand.content, nextCommand.callback);
+        }
     }
 
     this.write = function(content, callback) {
-        if (!btSerial.isOpen()) {
 
+        if (_writeIsInProgress) {
+            _writeQueue.push({content: content, callback: callback});
+        } else {
+            _writeIsInProgress = true;
+            _lastCommand = content;
+        }
+
+        if (!btSerial.isOpen()) {
             console.log("BT connection is closed. Reconnecting");
 
             _this.connect(function (result) {
