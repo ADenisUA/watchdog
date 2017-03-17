@@ -317,7 +317,9 @@ String generateEventJson(String eventName, String propertyName, float propertyVa
   json += propertyName;
   json += "\",\"value\":\"";
   json += propertyValue;
-  json += "\"}";
+  json += "\",\"timestamp\":";
+  json += millis();
+  json += "}";
   return json;
 }
 
