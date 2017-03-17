@@ -28,7 +28,7 @@ var BtSerial = module.exports = function BtSerial() {
 
     btSerial.on('data', function(buffer) {
         var data = buffer.toString('utf-8');
-        console.log(data);
+        console.log("Received data", data);
         if (_lastCommand && data.indexOf(_lastCommand) > -1) {
             _lastCommand = null;
             _writeIsInProgress = false;
@@ -143,6 +143,7 @@ var BtSerial = module.exports = function BtSerial() {
     this.write = function(content, callback) {
 
         if (_writeIsInProgress) {
+            console.log("writeIsInProgress. Pushing request to the queue");
             _writeQueue.push({content: content, callback: callback});
             return;
         } else {
