@@ -8,7 +8,6 @@ sudo -u pi autossh -M 0 -f -o "ServerAliveInterval 60" -o "ServerAliveCountMax 3
 sudo -u pi autossh -M 0 -f -o "ServerAliveInterval 60" -o "ServerAliveCountMax 3" -N -R 3334:localhost:443 -p 2244 rssh@j1.qr-code.ws &
 
 #sudo iptables -A PREROUTING -t nat -p tcp --dport 80 -j REDIRECT --to-port 3333
-
 #sudo iptables -A INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
 #sudo iptables -t nat -A OUTPUT -o lo -p tcp --dport 443 -j REDIRECT --to-port 3334
 #sudo iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-ports 3334

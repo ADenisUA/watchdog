@@ -12,8 +12,8 @@ self.addEventListener('push', function(event) {
                 body += payload[i].name;
                 body += "=";
                 body += payload[i].value;
-                // body += " on ";
-                // body += new Date(payload[i].timestamp);
+                body += " on ";
+                body += new Date(payload[i].timestamp);
                 body += "."
             }
         } catch (e) {
@@ -21,12 +21,12 @@ self.addEventListener('push', function(event) {
         }
     }
 
-    body += " Open Watchdog?";
-    var title = 'Watchdog notification';
+    body += " Open application?";
+    var title = "Watchdog";
 
-    var icon = '/img/icon192.png';
-    var image = '/stream/snapshot.jpeg';
-    var tag = 'tag';
+    var icon = "/img/icon192.png";
+    var image = "/stream/snapshot.jpeg";
+    var tag = "tag";
 
     event.waitUntil(
         self.registration.showNotification(title, {

@@ -21,6 +21,7 @@
 #define COMMAND_SET_TEMPERATURE_THRESHOLD       "setTemperatureThreshold"
 #define COMMAND_SET_SOUND_LEVEL_THRESHOLD       "setSoundLevelThreshold"
 #define COMMAND_SET_LIGHT_LEVEL_THRESHOLD       "setLightLevelThreshold"
+#define COMMAND_SET_TIMESTAMP                   "setTimestamp"
 
 #define COMMAND_STOP                            "stop"
 #define COMMAND_FIND_LIGHT                      "findLightDirection"
@@ -90,6 +91,7 @@ uint16_t previousObstacleProximity = 0;
 
 String lastCommand = "";
 long lastCommandTimeStamp = 0;
+long baseTimestamp = 0;
 
 float lastTemperature = -TEMPERATURE_THRESHOLD;
 float lastSoundLevel = -SOUND_LEVEL_THRESHOLD;
@@ -200,6 +202,10 @@ boolean processNonInterruptingCommand() {
     isProcessed = true;
   } else if (isCommand(COMMAND_SET_LIGHT_LEVEL_THRESHOLD)) {
     lightLevelThreshold = getCommandParamValueInt(lastCommand, "threshold");
+
+    isProcessed = true;
+  } else if (isCommand(COMMAND_SET_TIMESTAMP)) {
+    baseTimestamp = getCommandParamValueInt(lastCommand, "timestamp") - millis();
 
     isProcessed = true;
   }
@@ -318,7 +324,7 @@ String generateEventJson(String eventName, String propertyName, float propertyVa
   json += "\",\"value\":\"";
   json += propertyValue;
   json += "\",\"timestamp\":";
-  json += millis();
+  json += baseTimestamp + millis();
   json += "}";
   return json;
 }
