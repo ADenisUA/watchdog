@@ -144,6 +144,7 @@ var BtSerial = module.exports = function BtSerial() {
 
         if (_writeIsInProgress) {
             _writeQueue.push({content: content, callback: callback});
+            return;
         } else {
             _writeIsInProgress = true;
             _lastCommand = content;
