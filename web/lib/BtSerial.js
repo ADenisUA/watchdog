@@ -43,10 +43,16 @@ var BtSerial = module.exports = function BtSerial() {
 
     btSerial.on('closed', function() {
         console.log("BT connection is closed");
+        _lastCommand = null;
+        _writeIsInProgress = false;
+        if (_listenCallback) _listenCallback("BT connection is closed");
     });
 
     btSerial.on('failure', function(error) {
         console.log("BT error", error);
+        _lastCommand = null;
+        _writeIsInProgress = false;
+        if (_listenCallback) _listenCallback(error);
     });
 
     // btSerial.on('finished', function() {
