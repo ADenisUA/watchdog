@@ -13,6 +13,10 @@ var BtSerial = module.exports = function BtSerial() {
     const RESULT_ERROR_WRITE_ERROR = "Write error";
     const RESULT_OK = "OK";
 
+    var _writeQueue = new Array();
+    var _writeIsInProgress = false;
+    var _lastCommand = null;
+
     // btSerial.on('found', function found(address, name){
     //     console.log('Discovered BT device ' + name + ' ' + address);
     //
@@ -114,10 +118,6 @@ var BtSerial = module.exports = function BtSerial() {
         }
         return false;
     };
-
-    var _writeQueue = new Array();
-    var _writeIsInProgress = false;
-    var _lastCommand = null;
 
     var _write = function (content, callback) {
 
