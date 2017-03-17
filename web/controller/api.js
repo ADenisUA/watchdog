@@ -10,6 +10,8 @@ var btSerial = new BtSerial();
 var admin = require("firebase-admin");
 var serviceAccount = require("../firebase.json");
 
+btSerial.connect();
+
 const RESULT_OK = "OK";
 
 router.get('/write', function(request, response) {
