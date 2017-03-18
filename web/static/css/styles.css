@@ -102,6 +102,10 @@ button.js-push-button {
     left: 10px;
     bottom: 10px;
 }
+#streamingContainer a#getLightLevel {
+    left: 150px;
+    bottom: 10px;
+}
 #streamingContainer a#toggleStreaming {
     right: 10px;
     top: 10px;
