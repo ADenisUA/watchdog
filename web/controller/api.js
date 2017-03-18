@@ -77,6 +77,7 @@ function sendNotification(data) {
 
             for (var i in rows) {
                 if (rows[i].indexOf("\"event\"") > -1) {
+                    payload += (payload.length > 1) ? "," : "";
                     payload += rows[i];
                 }
             }
