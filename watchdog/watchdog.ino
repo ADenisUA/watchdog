@@ -50,8 +50,8 @@
 //constants
 #define ANGLE_SENSITIVITY           5
 #define TEMPERATURE_THRESHOLD       1.00f
-#define SOUND_LEVEL_THRESHOLD       250.00f
-#define LIGHT_LEVEL_THRESHOLD       300
+#define SOUND_LEVEL_THRESHOLD       300.00f
+#define LIGHT_LEVEL_THRESHOLD       400
 
 #define SPEED_DEFAULT               100
 #define SPEED_FIND_LIGHT_DIRECTION  75

@@ -76,9 +76,13 @@ function sendNotification(data) {
             payload = "[";
 
             for (var i in rows) {
-                if (rows[i].indexOf("\"event\"") > -1) {
-                    payload += (payload.length > 1) ? "," : "";
-                    payload += rows[i];
+                try {
+                    if (rows[i].indexOf("\"event\"") > -1 && JSON.parse(rows[i])) {
+                        payload += (payload.length > 1) ? "," : "";
+                        payload += rows[i];
+                    }
+                } catch (e) {
+
                 }
             }
 

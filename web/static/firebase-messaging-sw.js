@@ -17,7 +17,7 @@ self.addEventListener('push', function(event) {
                 body += "."
             }
         } catch (e) {
-            body += "Unable to parse event";
+            body += "";
         }
     }
 
