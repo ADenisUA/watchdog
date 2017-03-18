@@ -1,6 +1,6 @@
 
 self.addEventListener('push', function(event) {
-    console.log('Received a push message', event.data.json());
+    console.log('Received a push message', (event.data) ? event.data.json() : event);
 
     var body = "";
 
