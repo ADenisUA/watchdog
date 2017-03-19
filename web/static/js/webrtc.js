@@ -249,7 +249,7 @@ function onRemoteStreamRemoved(event) {
 
 $( document ).ready(function() {
     console.log( "ready!" );
-    start();
+    //start();
 });
 
 function onRemoteStreamAdded(event) {
