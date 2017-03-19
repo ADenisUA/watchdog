@@ -16,6 +16,18 @@ class Watchdog {
         this.getApi = function() {
             return _api;
         }
+
+
+        var _isStreaming = false;
+        var _isLedOn = false;
+
+        this.setIsStreaming = function(value) {
+            _isStreaming = value;
+        }
+
+        this.isStreaming = function() {
+            return _isStreaming;
+        }
     }
 
     static getInstance() {

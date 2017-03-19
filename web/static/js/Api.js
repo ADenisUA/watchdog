@@ -9,16 +9,7 @@ class Api {
     constructor() {
         console.log("Api started");
 
-        var _isStreaming = false;
         var _isLedOn = false;
-
-        this.setIsStreaming = function(value) {
-            _isStreaming = value;
-        }
-
-        this.isStreaming = function() {
-            return _isStreaming;
-        }
 
         this.setIsLedOn = function(value) {
             _isLedOn = value;
