@@ -54,7 +54,8 @@ function start() {
     if ("WebSocket" in window) {
         server = signalling_server_address;
 
-        var protocol = location.protocol === "https:" ? "wss:" : "ws:";
+        //var protocol = location.protocol === "https:" ? "wss:" : "ws:";
+        var protocol = "ws:";
         ws = new WebSocket(protocol + '//' + server + '/stream/webrtc');
 
         function offer(stream) {
