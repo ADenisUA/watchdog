@@ -55,8 +55,10 @@ class Watchdog {
     }
 
     stopStreaming() {
+        stopWebrtc();
+
         $("#streamingView").remove();
-        $("#streamingContainer").prepend('<img id="streamingView" src="https://' + location.hostname + ':3001/stream/snapshot.jpeg" />');
+        $("#streamingContainer").prepend('<img id="streamingView" src="https://' + location.hostname + ':3001/stream/snapshot.jpeg?timestamp=' +  (new Date()).getTime() + '" />');
     }
 
     startStreaming() {

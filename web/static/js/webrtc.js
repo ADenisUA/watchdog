@@ -1,15 +1,10 @@
 var signalling_server_hostname = window.location.hostname;
 var signalling_server_address = signalling_server_hostname + ":3001";
-var isFirefox = typeof InstallTrigger !== 'undefined';// Firefox 1.0+
 
 
 var ws = null;
 var pc;
-var gn;
-var datachannel, localdatachannel;
-var audio_video_stream;
-var recorder = null;
-var recordedBlobs;
+var datachannel;
 var pcConfig = {"iceServers": [
     {"urls": ["stun:stun.l.google.com:19302", "stun:" + signalling_server_hostname + ":3478"]}
 ]};
@@ -27,7 +22,6 @@ var mediaConstraints = {
         OfferToReceiveVideo: true
     }
 };
-var keys = [];
 
 RTCPeerConnection = window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
 RTCSessionDescription = window.mozRTCSessionDescription || window.RTCSessionDescription;
@@ -76,7 +70,6 @@ function startWebRtc() {
         ws.onopen = function () {
             console.log("onopen()");
 
-            audio_video_stream = null;
             var cast_mic = false;
             var cast_tab = false;
             var cast_camera = false;
@@ -197,6 +190,24 @@ function startWebRtc() {
 
     } else {
         alert("Sorry, this browser does not support WebSockets.");
+    }
+}
+
+function stopWebrtc() {
+    if (datachannel) {
+        console.log("closing data channels");
+        datachannel.close();
+        datachannel = null;
+    }
+
+    onRemoteStreamRemoved();
+    if (pc) {
+        pc.close();
+        pc = null;
+    }
+    if (ws) {
+        ws.close();
+        ws = null;
     }
 }
 
