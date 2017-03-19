@@ -31,4 +31,24 @@ class Watchdog {
         }
         return instance;
     }
+
+    toggleStreaming() {
+        if (this.isStreaming()) {
+            this.stopStreaming();
+        } else {
+            this.startStreaming();
+        }
+
+        this.setIsStreaming(!this.isStreaming());
+    }
+
+    stopStreaming() {
+        $("#streamingView").remove();
+        $("#streamingContainer").append('<img id="streamingView" src="https://' + location.hostname + ':3001/stream/snapshot.jpeg" width="100%" height="100%" />');
+    }
+
+    startStreaming() {
+        $("#streamingView").remove();
+        $("#streamingContainer").append('<img id="streamingView" src="https://' + location.hostname + ':3001/stream/video.mjpeg" width="100%" height="100%" />');
+    }
 }

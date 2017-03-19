@@ -95,26 +95,6 @@ class Api {
         });
     }
 
-    toggleStreaming() {
-        if (this.isStreaming()) {
-            this.stopStreaming();
-        } else {
-            this.startStreaming();
-        }
-
-        this.setIsStreaming(!this.isStreaming());
-    }
-
-    stopStreaming() {
-        $("#streamingView").remove();
-        $("#streamingContainer").append('<img id="streamingView" src="/stream/snapshot.jpeg" width="100%" height="100%" />');
-    }
-
-    startStreaming() {
-        $("#streamingView").remove();
-        $("#streamingContainer").append('<img id="streamingView" src="/stream/video.mjpeg" width="100%" height="100%" />');
-    }
-
     toggleLed() {
         if (this.isLedOn()) {
             this.turnOffLed();
