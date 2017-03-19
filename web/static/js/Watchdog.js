@@ -56,12 +56,12 @@ class Watchdog {
 
     stopStreaming() {
         $("#streamingView").remove();
-        $("#streamingContainer").append('<img id="streamingView" src="https://' + location.hostname + ':3001/stream/snapshot.jpeg" />');
+        $("#streamingContainer").prepend('<img id="streamingView" src="https://' + location.hostname + ':3001/stream/snapshot.jpeg" />');
     }
 
     startStreaming() {
         $("#streamingView").remove();
-        $("#streamingContainer").append('<video id="streamingView" autoplay muted />');
+        $("#streamingContainer").prepend('<video id="streamingView" autoplay muted />');
         startWebRtc();
     }
 }
