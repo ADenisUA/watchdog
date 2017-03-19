@@ -50,7 +50,7 @@ function createPeerConnection() {
     }
 }
 
-function start() {
+function startWebRtc() {
     if ("WebSocket" in window) {
         server = signalling_server_address;
 
@@ -243,20 +243,15 @@ function onDataChannel(event) {
 }
 
 function onRemoteStreamRemoved(event) {
-    var remoteVideoElement = document.getElementById('remote-video');
+    var remoteVideoElement = document.getElementById('streamingView');
     remoteVideoElement.src = '';
 }
-
-$( document ).ready(function() {
-    console.log( "ready!" );
-    start();
-});
 
 function onRemoteStreamAdded(event) {
     var url = URL.createObjectURL(event.stream);
     url = url.replace("http://localhost:8080", "http://" + signalling_server_hostname + ":3001");
     console.log("Remote stream added:", url);
-    var remoteVideoElement = document.getElementById('remote-video');
+    var remoteVideoElement = document.getElementById('streamingView');
     remoteVideoElement.src = URL.createObjectURL(event.stream);
     remoteVideoElement.play();
 }
