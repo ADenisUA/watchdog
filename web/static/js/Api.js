@@ -164,7 +164,7 @@ class Api {
 
             if (data && data.data) {
                 console.log(data.data);
-                //$("#output").html(data.data);
+                $("#output").html(data.data);
             }
 
             _this.listen(callback);
