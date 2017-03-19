@@ -87,7 +87,7 @@ if (isProduction) {
     var lexRedirectHandler = lex.middleware(require('redirect-https')());
     var httpHandler = function (req, res) {
         if (req.url.indexOf("stream/") > -1) {
-            httpsProxyInstance.web(req, res, {target: VIDEO_STREAM});
+            httpsProxyInstance.web(req, res, {forward: VIDEO_STREAM});
         } else {
             lexRedirectHandler(req, res);
         }
