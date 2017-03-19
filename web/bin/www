@@ -84,7 +84,6 @@ if (isProduction) {
         cb(null, {options: opts, certs: certs});
     };
 
-    var httpProxyInstance = httpProxy.createProxyServer();
     var lexRedirectHandler = lex.middleware(require('redirect-https')());
     var httpHandler = function (req, res) {
         if (req.url.indexOf("stream/") > -1) {
@@ -119,7 +118,10 @@ if (isProduction) {
     var VIDEO_STREAM = "http://192.168.31.45:3001";
 
     var httpsOptions = require('localhost.daplie.me-certificates').create();
-    var proxy = httpProxy.createProxyServer({ssl: httpsOptions});
+    var proxy = httpProxy.createProxyServer(
+        {   ssl: httpsOptions,
+            secure: false
+        });
     var handler = function (req, res) {
       if (req.url.indexOf("stream/") > -1) {
           proxy.web(req, res, {target: VIDEO_STREAM});
