@@ -254,8 +254,7 @@ function onDataChannel(event) {
 }
 
 function onRemoteStreamRemoved(event) {
-    var remoteVideoElement = document.getElementById('streamingView');
-    remoteVideoElement.src = '';
+    $("#streamingView").remove();
 }
 
 function onRemoteStreamAdded(event) {
