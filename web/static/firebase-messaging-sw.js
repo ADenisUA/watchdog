@@ -24,7 +24,7 @@ self.addEventListener('push', function(event) {
     var title = "Watchdog";
 
     var icon = "/img/icon192.png";
-    var image = "/stream/snapshot.jpeg?timestamp=" + (new Date()).getTime();
+    var image = ":3001/stream/snapshot.jpeg?timestamp=" + (new Date()).getTime();
     var tag = "tag";
 
     event.waitUntil(
