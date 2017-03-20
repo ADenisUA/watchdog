@@ -66,4 +66,11 @@ class Watchdog {
         $("#streamingContainer").prepend('<video id="streamingView" autoplay muted />');
         startWebRtc();
     }
+
+    startStreamingFallback() {
+        stopWebrtc();
+
+        $("#streamingView").remove();
+        $("#streamingContainer").prepend('<img id="streamingView" src="https://' + location.hostname + ':3001/stream/snapshot.mjpeg" />');
+    }
 }

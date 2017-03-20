@@ -133,12 +133,12 @@ function startWebRtc() {
                                 console.log(command);
 
                             }, function (error) {
-                                alert("Failed to createAnswer: " + error);
+                                console.log("Failed to createAnswer: ", error);
 
                             }, mediaConstraints);
                         },
                         function onRemoteSdpError(event) {
-                            alert('Failed to set remote description (unsupported codec on this browser?): ' + event);
+                            console.log('Failed to set remote description (unsupported codec on this browser?): ', event);
                             stop();
                         }
                     );
@@ -154,7 +154,7 @@ function startWebRtc() {
                     break;
 
                 case "message":
-                    alert(msg.data);
+                    console.log(msg.data, msg);
                     break;
 
                 case "geticecandidate":
@@ -184,7 +184,7 @@ function startWebRtc() {
         };
 
         ws.onerror = function (evt) {
-            alert("An error has occurred!");
+            console.log("An error has occurred!");
             ws.close();
         };
 
