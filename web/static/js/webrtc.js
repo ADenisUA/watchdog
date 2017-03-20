@@ -157,7 +157,7 @@ function startWebRtc() {
                     console.log(msg.data, msg);
 
                     if (msg.data == "ICE connection failed")
-                        Watchdog.startStreamingFallback();
+                        Watchdog.getInstance().startStreamingFallback();
                     break;
 
                 case "geticecandidate":
