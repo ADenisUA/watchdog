@@ -167,7 +167,7 @@ function startWebRtc() {
                         let candidate = new RTCIceCandidate({sdpMLineIndex: elt.sdpMLineIndex, candidate: elt.candidate});
                         pc.addIceCandidate(candidate,
                             function () {
-                                console.log("IceCandidate added: " + JSON.stringify(candidate));
+                                console.log("IceCandidate added: ", candidate);
                             },
                             function (error) {
                                 console.log("addIceCandidate error: " + error);
