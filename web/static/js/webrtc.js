@@ -6,7 +6,8 @@ var ws = null;
 var pc;
 var datachannel;
 var pcConfig = {"iceServers": [
-    {"urls": ["stun:stun.l.google.com:19302", "stun:" + signalling_server_hostname + ":3478"]}
+    //{"urls": ["stun:stun.l.google.com:19302", "stun:" + signalling_server_hostname + ":3478"]}
+    {"urls": ["stun:stun.l.google.com:19302"]}
 ]};
 var pcOptions = {
     optional: [
@@ -146,7 +147,7 @@ function startWebRtc() {
                     var command = {
                         command_id: "geticecandidate"
                     };
-                    console.log(command);
+                    //console.log(command);
                     ws.send(JSON.stringify(command));
                     break;
 
