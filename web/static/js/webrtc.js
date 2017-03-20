@@ -156,8 +156,9 @@ function startWebRtc() {
                 case "message":
                     console.log(msg.data, msg);
 
-                    if (msg.data == "ICE connection failed")
+                    if (msg.data == "ICE connection failed") {
                         Watchdog.getInstance().startStreamingFallback();
+                    }
                     break;
 
                 case "geticecandidate":
@@ -170,11 +171,10 @@ function startWebRtc() {
                                 console.log("IceCandidate added: ", candidate);
                             },
                             function (error) {
-                                console.log("addIceCandidate error: " + error);
+                                console.log("addIceCandidate error: ", error);
                             }
                         );
                     }
-                    document.documentElement.style.cursor ='default';
                     break;
             }
         };
@@ -225,6 +225,7 @@ function onIceCandidate(event) {
             command_id: "addicecandidate",
             data: JSON.stringify(candidate)
         };
+        console.log("Send command", command);
         ws.send(JSON.stringify(command));
     } else {
         console.log("End of candidates.");
@@ -237,7 +238,6 @@ function onDataChannel(event) {
 
     event.channel.onopen = function () {
         console.log("Data Channel is open!");
-        //document.getElementById('datachannels').disabled = false;
     };
 
     event.channel.onerror = function (error) {
@@ -246,12 +246,10 @@ function onDataChannel(event) {
 
     event.channel.onmessage = function (event) {
         console.log("Got Data Channel Message:", event.data);
-        //document.getElementById('datareceived').value = event.data;
     };
 
     event.channel.onclose = function () {
         datachannel = null;
-        //document.getElementById('datachannels').disabled = true;
         console.log("The Data Channel is Closed");
     };
 }
