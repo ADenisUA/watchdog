@@ -69,6 +69,8 @@ function sendNotification(data) {
         var id = url.substring(url.lastIndexOf("/") + 1);
         var payload = "";
 
+        var eventsCount = 0;
+
         if (data && (data.indexOf("\"event\"") > -1)) {
             //we need to process only events
 
@@ -81,6 +83,7 @@ function sendNotification(data) {
                         payload += (payload.length > 1) ? "," : "";
                         payload += rows[i];
                     }
+                    eventsCount++;
                 } catch (e) {
 
                 }
@@ -88,6 +91,11 @@ function sendNotification(data) {
 
             payload += "]";
         } else {
+            return;
+        }
+
+        if (eventsCount == 0) {
+            console.log("No events detected", data);
             return;
         }
 
