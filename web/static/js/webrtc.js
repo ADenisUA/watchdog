@@ -26,7 +26,7 @@ var pcOptions = {
 var mediaConstraints = {
     optional: [],
     mandatory: {
-        OfferToReceiveAudio: true,
+        OfferToReceiveAudio: false,
         OfferToReceiveVideo: true
     }
 };
@@ -67,7 +67,7 @@ function startWebRtc() {
             var command = {
                 command_id: "offer",
                 options: {
-                    force_hw_vcodec: false,
+                    force_hw_vcodec: true,
                     vformat: 60
                 }
             };
@@ -269,8 +269,8 @@ function onRemoteStreamRemoved(event) {
 function onRemoteStreamAdded(event) {
     var url = URL.createObjectURL(event.stream);
     url = url.replace("http://localhost:8080", "http://" + signalling_server_hostname + ":3001");
-    console.log("Remote stream added:", url);
+    console.log("Remote stream added:", url, event);
     var remoteVideoElement = document.getElementById('streamingView');
-    remoteVideoElement.src = URL.createObjectURL(event.stream);
+    remoteVideoElement.src = url;
     remoteVideoElement.play();
 }
