@@ -51,6 +51,7 @@ var BtSerial = module.exports = function BtSerial() {
         console.log("BT connection is closed");
         _lastCommand = null;
         _writeIsInProgress = false;
+        _writeQueue = new Array();
         if (_listenCallback) _listenCallback("BT connection is closed");
     });
 
@@ -58,6 +59,7 @@ var BtSerial = module.exports = function BtSerial() {
         console.log("BT error", error);
         _lastCommand = null;
         _writeIsInProgress = false;
+        _writeQueue = new Array();
         if (_listenCallback) _listenCallback(error);
     });
 
@@ -102,6 +104,8 @@ var BtSerial = module.exports = function BtSerial() {
     };
 
     var _connect = function(name, address, callback) {
+        _writeQueue = new Array();
+
         if (name.indexOf(DEVICE_NAME) > -1) {
             btSerial.findSerialPortChannel(address, function (channel) {
                 console.log('Found BT COM channel for serial port on %s: ', name, address, channel);
