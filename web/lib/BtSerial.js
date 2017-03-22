@@ -11,11 +11,14 @@ var BtSerial = module.exports = function BtSerial() {
     const RESULT_ERROR_BAD_CHANNEL = "Bad channel";
     const RESULT_ERROR_CONNECTION_FAILURE = "Unable to connect";
     const RESULT_ERROR_WRITE_ERROR = "Write error";
+    const RESULT_ERROR_WRITE_TIMEOUT = "Write timeout";
     const RESULT_OK = "OK";
+    const WRITE_TIMEOUT = 3000;
 
     var _writeQueue = new Array();
     var _writeIsInProgress = false;
     var _lastCommand = null;
+    var _writeTimer = null;
 
     // btSerial.on('found', function found(address, name){
     //     console.log('Discovered BT device ' + name + ' ' + address);
@@ -34,6 +37,9 @@ var BtSerial = module.exports = function BtSerial() {
         var data = buffer.toString('utf-8');
         console.log("Received data:", data);
         if (_lastCommand && data.indexOf(_lastCommand) > -1) {
+            if (_writeTimer) {
+                clearTimeout(_writeTimer);
+            }
             _lastCommand = null;
             _writeIsInProgress = false;
             _processNextWriteQueueElement();
@@ -131,8 +137,19 @@ var BtSerial = module.exports = function BtSerial() {
             _writeQueue.push({content: content, callback: callback});
             return;
         } else {
+            if (_writeTimer) {
+                clearTimeout(_writeTimer);
+            }
+
             _writeIsInProgress = true;
             _lastCommand = content;
+
+            _writeTimer = setTimeout(function() {
+                console.log("Write timeout:", _lastCommand);
+                _writeIsInProgress = false;
+                _lastCommand = null;
+                if (callback) callback(RESULT_ERROR_WRITE_TIMEOUT);
+            }, WRITE_TIMEOUT);
         }
 
         btSerial.write(new Buffer(content, 'utf-8'), function(error, bytesWritten) {
