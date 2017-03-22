@@ -5,6 +5,7 @@
 //#include "MeEEPROM.h"
 #include <Wire.h>
 #include <SoftwareSerial.h>
+//#include <avr/sleep.h>
 
 /** FOLLOW THE LIGHT **/
 
@@ -22,6 +23,7 @@
 #define COMMAND_SET_SOUND_LEVEL_THRESHOLD       "setSoundLevelThreshold"
 #define COMMAND_SET_LIGHT_LEVEL_THRESHOLD       "setLightLevelThreshold"
 #define COMMAND_SET_TIMESTAMP                   "setTimestamp"
+#define COMMAND_SET_SPEED                       "setSpeed"
 
 #define COMMAND_STOP                            "stop"
 #define COMMAND_FIND_LIGHT                      "findLightDirection"
@@ -54,8 +56,6 @@
 #define LIGHT_LEVEL_THRESHOLD       400
 
 #define SPEED_DEFAULT               100
-#define SPEED_FIND_LIGHT_DIRECTION  75
-#define SPEED_TURN                  75
 #define SPEED_MINIMAL               75
 
 #define DISTANCE_TOO_CLOSE          20
@@ -100,6 +100,7 @@ uint16_t lastLightLevel = -LIGHT_LEVEL_THRESHOLD;
 float temperatureThreshold = TEMPERATURE_THRESHOLD;
 float soundLevelThreshold = SOUND_LEVEL_THRESHOLD;
 uint16_t lightLevelThreshold = LIGHT_LEVEL_THRESHOLD;
+uint8_t defaultSpeed = SPEED_DEFAULT;
 
 long lastSensorUpdateTimeStamp = 0;
 
@@ -111,6 +112,13 @@ long lastSensorUpdateTimeStamp = 0;
 void loop()
 {
   waitForCommand();
+
+//set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+//cli();
+//sleep_enable();
+//sei();
+//sleep_cpu();
+
 }
 
 /**
@@ -128,6 +136,7 @@ void waitForCommand() {
 }
 
 boolean isInterrupted() {
+  delay(DELAY_NANO);
   runBackgroundProcesses();
   
   if (hasNewCommand()) {
@@ -206,17 +215,19 @@ boolean processNonInterruptingCommand() {
     isProcessed = true;
   } else if (isCommand(COMMAND_SET_TIMESTAMP)) {
     long timestamp = getCommandParamValueLong(lastCommand, "timestamp");
-    Serial.println(timestamp);
     baseTimestamp = getCommandParamValueLong(lastCommand, "timestamp") - millis()/1000;
-    Serial.println(baseTimestamp);
+    isProcessed = true;
+  } else if (isCommand(COMMAND_SET_SPEED)) {
+    defaultSpeed = getCommandParamValueLong(lastCommand, "speed");
+    
     isProcessed = true;
   }
 
-  if (isProcessed) {
-    Serial.print("Processed command: ");
-    Serial.println(lastCommand);
-    lastCommand = "";
-  }
+//  if (isProcessed) {
+//    Serial.print("Processed command: ");
+//    Serial.println(lastCommand);
+//    lastCommand = "";
+//  }
 
   return isProcessed;
 }
@@ -238,42 +249,42 @@ boolean processInterruptingCommand() {
     isProcessed = true;
   } else if (isCommand(COMMAND_BACKWARD_RIGHT)) {
     lastCommand = "";
-    BackwardAndTurnRight(SPEED_DEFAULT);
+    BackwardAndTurnRight(defaultSpeed);
     executeAndStopUntilNewCommandWithDelay();
     isProcessed = true;
   } else if (isCommand(COMMAND_BACKWARD_LEFT)) {
     lastCommand = "";
-    BackwardAndTurnLeft(SPEED_DEFAULT);
+    BackwardAndTurnLeft(defaultSpeed);
     executeAndStopUntilNewCommandWithDelay();
     isProcessed = true;
   } else if (isCommand(COMMAND_FORWARD_RIGHT)) {
     lastCommand = "";
-    TurnRight(SPEED_DEFAULT);
+    TurnRight(defaultSpeed);
     executeAndStopUntilNewCommandWithDelay();
     isProcessed = true;
   } else if (isCommand(COMMAND_FORWARD_LEFT)) {
     lastCommand = "";
-    TurnLeft(SPEED_DEFAULT);
+    TurnLeft(defaultSpeed);
     executeAndStopUntilNewCommandWithDelay();
     isProcessed = true;
   } else if (isCommand(COMMAND_FORWARD)) {
     lastCommand = "";
-    Forward(SPEED_DEFAULT);
+    Forward(defaultSpeed);
     executeAndStopUntilNewCommandWithDelay();
     isProcessed = true;
   } else if (isCommand(COMMAND_BACKWARD)) {
     lastCommand = "";
-    Backward(SPEED_DEFAULT);
+    Backward(defaultSpeed);
     executeAndStopUntilNewCommandWithDelay();
     isProcessed = true;
   } else if (isCommand(COMMAND_LEFT)) {
     lastCommand = "";
-    Left(SPEED_DEFAULT);
+    Left(defaultSpeed);
     executeAndStopUntilNewCommandWithDelay();
     isProcessed = true;
   } else if (isCommand(COMMAND_RIGHT)) {
     lastCommand = "";
-    Right(SPEED_DEFAULT);
+    Right(defaultSpeed);
     executeAndStopUntilNewCommandWithDelay();
     isProcessed = true;
   }
@@ -378,14 +389,14 @@ void modeOnTilt() {
   Serial.print(" ground=");
   Serial.println(getGroundFlag());  
 
-  Backward(SPEED_DEFAULT);
+  Backward(defaultSpeed);
   
   delay(DELAY_MICRO);
 
   if (getRandomDirection() < 1) {
-    BackwardAndTurnRight(SPEED_DEFAULT);
+    BackwardAndTurnRight(defaultSpeed);
   } else {
-    BackwardAndTurnLeft(SPEED_DEFAULT);
+    BackwardAndTurnLeft(defaultSpeed);
   }  
   
   do {     
@@ -420,14 +431,14 @@ void modeObstacleIsTooClose() {
   Serial.print(" distance=");
   Serial.println(obstacleProximity);
 
-  Backward(SPEED_DEFAULT);
+  Backward(defaultSpeed);
   
   delay(DELAY_MICRO);
   
   if (getRandomDirection() < 1) {
-    Right(SPEED_DEFAULT);
+    Right(defaultSpeed);
   } else {
-    Left(SPEED_DEFAULT);
+    Left(defaultSpeed);
   }
  
   do {
@@ -465,12 +476,12 @@ void modeAvoidObstacle() {
   Serial.print(" distance=");
   Serial.println(obstacleProximity);
   
-  //moveWithTurn(SPEED_DEFAULT, getRandomDirection());
+  //moveWithTurn(defaultSpeed, getRandomDirection());
 
   if (getRandomDirection() < 1) {
-    TurnRight(SPEED_DEFAULT);
+    TurnRight(defaultSpeed);
   } else {
-    TurnLeft(SPEED_DEFAULT);
+    TurnLeft(defaultSpeed);
   }
 
   do {
@@ -512,7 +523,7 @@ void modeContinueNavigation() {
 
   } else {
     
-    Forward(SPEED_DEFAULT);
+    Forward(defaultSpeed);
   }  
 }
 
@@ -521,14 +532,14 @@ void modeContinueNavigation() {
  */
 void modeStuck() {
   
-  Backward(SPEED_DEFAULT);
+  Backward(defaultSpeed);
   
   delay(DELAY_DEFAULT);
   
   if (getRandomDirection() < 1) {
-    BackwardAndTurnRight(SPEED_DEFAULT);
+    BackwardAndTurnRight(defaultSpeed);
   } else {
-    BackwardAndTurnLeft(SPEED_DEFAULT);
+    BackwardAndTurnLeft(defaultSpeed);
   }
   
   delay(DELAY_DEFAULT*2);
@@ -555,9 +566,9 @@ boolean commandFindLightDirection() {
 //  Serial.println(lightLevel);
 
   if (lightBalance < 1) {
-    Right(SPEED_DEFAULT);
+    Right(defaultSpeed);
   } else {
-    Left(SPEED_DEFAULT);
+    Left(defaultSpeed);
   } 
   
   do {
@@ -589,7 +600,7 @@ boolean commandFindLightDirection() {
 
   delay(DELAY_DEFAULT);
 
-  turnToAngle(SPEED_DEFAULT, maxLightLevelDirection);
+  turnToAngle(defaultSpeed, maxLightLevelDirection);
 }
 
 /**
@@ -845,44 +856,6 @@ String getCommandParamValue(String command, String paramName) {
 long getCommandParamValueLong(String command, String paramName) {
   String paramValue = getCommandParamValue(command, paramName);
   return (paramValue.length() > 0) ? paramValue.toInt() : -1;
-}
-
-const int16_t TEMPERATURENOMINAL     = 25;    //Nominl temperature depicted on the datasheet
-const int16_t SERIESRESISTOR         = 10000; // Value of the series resistor
-const int16_t BCOEFFICIENT           = 3380;  // Beta value for our thermistor(3350-3399)
-const int16_t TERMISTORNOMINAL       = 10000; // Nominal temperature value for the thermistor
-
-/**
- * \par Function
- *    calculate_temp
- * \par Description
- *    This function is used to convert the temperature.
- * \param[in]
- *    In_temp - Analog values from sensor.
- * \par Output
- *    None
- * \return
- *    the temperature in degrees Celsius
- * \par Others
- *    None
- */
-float calculate_temp(int16_t In_temp)
-{
-  float media;
-  float temperatura;
-  media = (float)In_temp;
-  // Convert the thermal stress value to resistance
-  media = 1023.0 / media - 1;
-  media = SERIESRESISTOR / media;
-  //Calculate temperature using the Beta Factor equation
-
-  temperatura = media / TERMISTORNOMINAL;              // (R/Ro)
-  temperatura = log(temperatura); // ln(R/Ro)
-  temperatura /= BCOEFFICIENT;                         // 1/B * ln(R/Ro)
-  temperatura += 1.0 / (TEMPERATURENOMINAL + 273.15);  // + (1/To)
-  temperatura = 1.0 / temperatura;                     // Invert the value
-  temperatura -= 273.15;                               // Convert it to Celsius
-  return temperatura;
 }
 
 /********* MOVEMENT RELATED **********/

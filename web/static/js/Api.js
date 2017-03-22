@@ -145,6 +145,12 @@ class Api {
         });
     }
 
+    setSpeed(speed, callback) {
+        $.get("/api/write?content=setSpeed+speed%3D"+speed, function () {
+            Utils.callFunction(callback);
+        });
+    }
+
     setSoundLevelThreshold(threshold, callback) {
         $.get("/api/write?content=setSoundLevelThreshold+threshold%3D"+threshold, function () {
             Utils.callFunction(callback);
