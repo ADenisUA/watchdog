@@ -97,16 +97,16 @@ class Api {
     }
 
     turnOnLed(callback) {
-        // $.get("/api/write?content=led+r%3D255+g%3D255+b%3D255+index%3D2", function () {
-        //     $.get("/api/write?content=led+r%3D255+g%3D255+b%3D255+index%3D5", function () {
-        //         $.get("/api/write?content=led+r%3D255+g%3D255+b%3D255+index%3D11", function () {
-        //             Utils.callFunction(callback);
-        //         });
-        //     });
-        // });
-
         $.get("/api/write?content=led+r%3D255+g%3D255+b%3D255+index%3D2", function () {
+            $.get("/api/write?content=led+r%3D255+g%3D255+b%3D255+index%3D5", function () {
+                $.get("/api/write?content=led+r%3D255+g%3D255+b%3D255+index%3D11", function () {
+                    Utils.callFunction(callback);
+                });
+            });
         });
+        //
+        // $.get("/api/write?content=led+r%3D255+g%3D255+b%3D255+index%3D2", function () {
+        // });
     }
 
     turnOffLed(callback) {
