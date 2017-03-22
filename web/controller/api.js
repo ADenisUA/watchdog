@@ -7,6 +7,7 @@ var request = require('request');
 var router = express.Router();
 var BtSerial = require("../lib/BtSerial.js");
 var btSerial = new BtSerial();
+var Utils = require("../lib/Utils.js");
 var admin = require("firebase-admin");
 var serviceAccount = require("../firebase.json");
 
@@ -22,8 +23,7 @@ btSerial.connect(function (result) {
 
             sendNotification(data);
 
-            if (_lastResponse && !_lastResponse.finished) {
-                _lastResponse.status(200).json({data: _listenData});
+            if (Utils.respond(_lastResponse, 200, {data: _listenData})) {
                 _listenData = "";
             }
         });
@@ -34,7 +34,7 @@ router.get('/write', function(request, response) {
     var content = request.param("content");
 
     btSerial.write(content, function (result) {
-        response.status((result == RESULT_OK) ? 200 : 500).json({status: result});
+        Utils.respond(response, (result == RESULT_OK) ? 200 : 500, {status: result});
     });
 });
 
@@ -65,7 +65,6 @@ function sendNotification(data) {
     for (var i in notificationUrls) {
         var url = notificationUrls[i];
         // Set up the request
-        var host = url.substring(0, url.lastIndexOf("/"));
         var id = url.substring(url.lastIndexOf("/") + 1);
         var payload = "";
 

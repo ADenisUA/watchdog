@@ -1,8 +1,9 @@
 "use strict";
 
 var btSerial = new (require('bluetooth-serial-port')).BluetoothSerialPort();
+var Utils = require("./Utils.js");
 
-var BtSerial = module.exports = function BtSerial() {
+module.exports = function BtSerial() {
     var _this = this;
     var _listenCallback = null;
     const DEVICE_NAME = "Makeblock";
@@ -33,34 +34,48 @@ var BtSerial = module.exports = function BtSerial() {
     //     }
     // });
 
+    var _resetLastCommand = function () {
+        _lastCommand = null;
+        _writeIsInProgress = false;
+    };
+
+    var _resetWriteQueue = function() {
+        _resetLastCommand();
+        _writeQueue = new Array();
+    }
+
+    var _clearWriteTimer = function() {
+        if (_writeTimer) {
+            clearTimeout(_writeTimer);
+        }
+    };
+
     btSerial.on('data', function(buffer) {
         var data = buffer.toString('utf-8');
         console.log("Received data:", data);
         if (_lastCommand && data.indexOf(_lastCommand) > -1) {
-            if (_writeTimer) {
-                clearTimeout(_writeTimer);
-            }
-            _lastCommand = null;
-            _writeIsInProgress = false;
+            _clearWriteTimer();
+            _resetLastCommand();
             _processNextWriteQueueElement();
         }
-        if (_listenCallback) _listenCallback(data);
+
+        Utils.callFunction(_listenCallback, data);
     });
 
     btSerial.on('closed', function() {
         console.log("BT connection is closed");
-        _lastCommand = null;
-        _writeIsInProgress = false;
-        _writeQueue = new Array();
-        if (_listenCallback) _listenCallback("BT connection is closed");
+
+        _resetWriteQueue();
+
+        Utils.callFunction(_listenCallback, "BT connection is closed");
     });
 
     btSerial.on('failure', function(error) {
         console.log("BT error", error);
-        _lastCommand = null;
-        _writeIsInProgress = false;
-        _writeQueue = new Array();
-        if (_listenCallback) _listenCallback(error);
+
+        _resetWriteQueue();
+
+        Utils.callFunction(_listenCallback, error);
     });
 
     // btSerial.on('finished', function() {
@@ -104,7 +119,7 @@ var BtSerial = module.exports = function BtSerial() {
     };
 
     var _connect = function(name, address, callback) {
-        _writeQueue = new Array();
+        _resetWriteQueue();
 
         if (name.indexOf(DEVICE_NAME) > -1) {
             btSerial.findSerialPortChannel(address, function (channel) {
@@ -112,7 +127,7 @@ var BtSerial = module.exports = function BtSerial() {
 
                 if (channel < 0) {
                     console.log(RESULT_ERROR_BAD_CHANNEL, channel);
-                    if (callback) callback(RESULT_ERROR_BAD_CHANNEL);
+                    Utils.callFunction(callback, RESULT_ERROR_BAD_CHANNEL);
                     return;
                 }
 
@@ -123,7 +138,7 @@ var BtSerial = module.exports = function BtSerial() {
                     _write("setTimestamp timestamp="+(Math.round(new Date().getTime()/1000)), callback);
                 }, function() {
                     console.log(RESULT_ERROR_CONNECTION_FAILURE, name, address);
-                    if (callback) callback(RESULT_ERROR_CONNECTION_FAILURE);
+                    Utils.callFunction(callback, RESULT_ERROR_CONNECTION_FAILURE);
                 });
 
             });
@@ -141,28 +156,25 @@ var BtSerial = module.exports = function BtSerial() {
             _writeQueue.push({content: content, callback: callback});
             return;
         } else {
-            if (_writeTimer) {
-                clearTimeout(_writeTimer);
-            }
+            _clearWriteTimer();
 
             _writeIsInProgress = true;
             _lastCommand = content;
 
             _writeTimer = setTimeout(function() {
                 console.log("Write timeout:", _lastCommand);
-                _writeIsInProgress = false;
-                _lastCommand = null;
-                if (callback) callback(RESULT_ERROR_WRITE_TIMEOUT);
+                _resetWriteQueue();
+                Utils.callFunction(callback, RESULT_ERROR_WRITE_TIMEOUT);
             }, WRITE_TIMEOUT);
         }
 
         btSerial.write(new Buffer(content, 'utf-8'), function(error, bytesWritten) {
             if (error) {
                 console.log(error);
-                if (callback) callback(RESULT_ERROR_WRITE_ERROR);
+                Utils.callFunction(callback, RESULT_ERROR_WRITE_ERROR);
             } else {
                 console.log("Written", content);
-                if (callback) callback(RESULT_OK);
+                Utils.callFunction(callback, RESULT_OK);
             }
         });
     };
@@ -182,7 +194,7 @@ var BtSerial = module.exports = function BtSerial() {
                 if (result == RESULT_OK) {
                     _write(content, callback);
                 } else {
-                    if (callback) callback(result);
+                    Utils.callFunction(callback, result);
                 }
             });
         } else {
