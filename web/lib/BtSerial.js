@@ -131,7 +131,6 @@ module.exports = function BtSerial() {
                     return;
                 }
 
-                // make bluetooth connect to remote device
                 btSerial.connect(address, channel, function () {
                     console.log("Connected to BT device", name, address);
 
