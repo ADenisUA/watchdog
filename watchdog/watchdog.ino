@@ -112,13 +112,6 @@ long lastSensorUpdateTimeStamp = 0;
 void loop()
 {
   waitForCommand();
-
-//set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-//cli();
-//sleep_enable();
-//sei();
-//sleep_cpu();
-
 }
 
 /**
@@ -140,7 +133,7 @@ boolean isInterrupted() {
   runBackgroundProcesses();
   
   if (hasNewCommand()) {
-    lastCommand = Serial.readString();
+    lastCommand = Serial.readStringUntil(';');
     Serial.print("Received command: ");
     Serial.println(lastCommand);
     lastCommandTimeStamp = millis();

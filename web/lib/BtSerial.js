@@ -167,7 +167,7 @@ module.exports = function BtSerial() {
             }, WRITE_TIMEOUT);
         }
 
-        btSerial.write(new Buffer(content, 'utf-8'), function(error, bytesWritten) {
+        btSerial.write(new Buffer(content + ";", 'utf-8'), function(error, bytesWritten) {
             if (error) {
                 console.log(error);
                 Utils.callFunction(callback, RESULT_ERROR_WRITE_ERROR);
