@@ -24,6 +24,7 @@
 #define COMMAND_SET_LIGHT_LEVEL_THRESHOLD       "setLightLevelThreshold"
 #define COMMAND_SET_TIMESTAMP                   "setTimestamp"
 #define COMMAND_SET_SPEED                       "setSpeed"
+#define COMMAND_SET_POWER_SAVER_TIMEOUT         "setPowerSaverTimeout"
 
 #define COMMAND_STOP                            "stop"
 #define COMMAND_FIND_LIGHT                      "findLightDirection"
@@ -54,6 +55,7 @@
 #define TEMPERATURE_THRESHOLD       1.00f
 #define SOUND_LEVEL_THRESHOLD       300.00f
 #define LIGHT_LEVEL_THRESHOLD       400
+#define POWER_SAVER_TIMEOUT         60000
 
 #define SPEED_DEFAULT               100
 #define SPEED_MINIMAL               75
@@ -92,6 +94,7 @@ uint16_t previousObstacleProximity = 0;
 String lastCommand = "";
 long lastCommandTimeStamp = 0;
 long baseTimestamp = 0;
+long powerSaverTimeout = POWER_SAVER_TIMEOUT;
 
 float lastTemperature = -TEMPERATURE_THRESHOLD;
 float lastSoundLevel = -SOUND_LEVEL_THRESHOLD;
@@ -122,14 +125,13 @@ void waitForCommand() {
   processInterruptingCommand();
   
   while (!isInterrupted()) {
-    ;
+    checkPowerSavingConditions();
   }
 
   processInterruptingCommand();
 }
 
 boolean isInterrupted() {
-  delay(DELAY_NANO);
   runBackgroundProcesses();
   
   if (hasNewCommand()) {
@@ -141,6 +143,16 @@ boolean isInterrupted() {
   }
 
   return false;
+}
+
+void checkPowerSavingConditions() {
+  if (millis() > lastCommandTimeStamp + powerSaverTimeout) {
+    //Serial.println("Entering power saving mode");
+    delay(powerSaverTimeout/10);
+  } else if (millis() > lastCommandTimeStamp + powerSaverTimeout/2) {
+    //Serial.println("Entering stand by mode");
+    delay(DELAY_DEFAULT);    
+  }
 }
 
 boolean hasNewCommand() {
@@ -214,13 +226,11 @@ boolean processNonInterruptingCommand() {
     defaultSpeed = getCommandParamValueLong(lastCommand, "speed");
     
     isProcessed = true;
+  } else if (isCommand(COMMAND_SET_POWER_SAVER_TIMEOUT)) {
+    powerSaverTimeout = getCommandParamValueLong(lastCommand, "timeout");
+    
+    isProcessed = true;   
   }
-
-//  if (isProcessed) {
-//    Serial.print("Processed command: ");
-//    Serial.println(lastCommand);
-//    lastCommand = "";
-//  }
 
   return isProcessed;
 }
