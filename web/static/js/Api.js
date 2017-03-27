@@ -163,6 +163,12 @@ class Api {
         });
     }
 
+    setTimestamp(timestamp, callback) {
+        $.get("/api/write?content=setTimestamp+timestamp%3D"+timestamp, function () {
+            Utils.callFunction(callback);
+        });
+    }
+
     listen(callback) {
         var _this = this;
         $.get("/api/listen", function (data) {

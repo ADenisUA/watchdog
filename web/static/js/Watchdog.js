@@ -36,11 +36,13 @@ class Watchdog {
             instance = new Watchdog();
             instance.getApi().listen();
 
-            instance.getApi().setTemperatureThreshold(TEMPERATURE_THRESHOLD, function () {
-                instance.getApi().setSoundLevelThreshold(SOUND_LEVEL_THRESHOLD, function () {
-                    instance.getApi().setLightLevelThreshold(LIGHT_LEVEL_THRESHOLD, function () {
-                        instance.getApi().setSpeed(SPEED, function () {
+            instance.getApi().setTimestamp((Math.round(new Date().getTime()/1000)), function () {
+                instance.getApi().setTemperatureThreshold(TEMPERATURE_THRESHOLD, function () {
+                    instance.getApi().setSoundLevelThreshold(SOUND_LEVEL_THRESHOLD, function () {
+                        instance.getApi().setLightLevelThreshold(LIGHT_LEVEL_THRESHOLD, function () {
+                            instance.getApi().setSpeed(SPEED, function () {
 
+                            });
                         });
                     });
                 });
