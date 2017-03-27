@@ -64,7 +64,7 @@ self.addEventListener('notificationclick', function(event) {
                                 return client.focus();
                         }
                         if (clients.openWindow) {
-                            return clients.openWindow("https://" + self.location.hostname);
+                            return clients.openWindow("https://" + self.location.hostname + "/watchdog.html");
                         }
                     })
             );
