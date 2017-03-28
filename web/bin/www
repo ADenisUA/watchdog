@@ -127,7 +127,7 @@ wsServer.on('connection', function connection(connection) {
 app.getApi().onBtData(function(data) {
     for (var i in connections) {
         if (connections[i] != null && connections[i].readyState == connections[i].OPEN) {
-            connection.send(data);
+            connections[i].send(data);
         }
     }
 });
