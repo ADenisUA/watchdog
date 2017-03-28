@@ -4,11 +4,13 @@
  * Module dependencies.
  */
 
-var app = require('../app');
-var debug = require('debug')('web:server');
-var http = require('http');
-var https = require('https');
-var fs = require('fs');
+const app = require('../app');
+const debug = require('debug')('web:server');
+const http = require('http');
+const https = require('https');
+const fs = require('fs');
+const WebSocket = require('ws');
+const url = require('url');
 
 var isProduction = false;
 
@@ -107,6 +109,28 @@ if (isProduction) {
         onListening(httpsServer);
     });
 }
+
+const wsServer = new WebSocket.Server({ server: httpsServer });
+const connections = new Array();
+
+wsServer.on('connection', function connection(connection) {
+    const location = url.parse(connection.upgradeReq.url, true);
+    console.log("Established wss connection", location);
+
+    connections.push(connection);
+
+    connection.on('message', function incoming(message) {
+        console.log('received: %s', message);
+    });
+});
+
+app.getApi().onBtData(function(data) {
+    for (var i in connections) {
+        if (connections[i] != null && connections[i].readyState == connections[i].OPEN) {
+            connection.send(data);
+        }
+    }
+});
 
 function onError(error, port) {
     if (error.syscall !== 'listen') {

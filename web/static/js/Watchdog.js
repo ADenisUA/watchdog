@@ -34,7 +34,9 @@ class Watchdog {
     static getInstance() {
         if (!instance) {
             instance = new Watchdog();
-            instance.getApi().listen();
+            instance.getApi().listen(function(data) {
+                $("#output").html(data);
+            });
 
             instance.getApi().setTimestamp((Math.round(new Date().getTime()/1000)), function () {
                 instance.getApi().setTemperatureThreshold(TEMPERATURE_THRESHOLD, function () {

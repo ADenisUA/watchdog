@@ -47,5 +47,9 @@ app.use(function(err, req, res, next) {
   });
 });
 
+app.getApi = function() {
+  return api;
+}
+
 
 module.exports = app;

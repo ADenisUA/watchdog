@@ -170,17 +170,16 @@ class Api {
     }
 
     listen(callback) {
-        var _this = this;
-        $.get("/api/listen", function (data) {
-            Utils.callFunction(callback, data);
-
-            if (data && data.data) {
-                console.log(data.data);
-                $("#output").html(data.data);
+        var ws = new WebSocket("wss://" + location.hostname + ":" + location.port);
+        ws.onopen = function (event) {
+            console.log("Connected to ws", event);
+            ws.onmessage = function(event) {
+                console.log("ws got message", event);
+                if (event.data) {
+                    Utils.callFunction(callback, event.data);
+                }
             }
-
-            _this.listen(callback);
-        });
+        };
     }
 
     register(url, callback) {

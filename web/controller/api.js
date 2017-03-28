@@ -2,33 +2,32 @@
  * Created by davdeev on 4/21/16.
  */
 
-var express = require("express");
-var request = require('request');
-var router = express.Router();
-var BtSerial = require("../lib/BtSerial.js");
-var btSerial = new BtSerial();
-var Utils = require("../lib/Utils.js");
-var admin = require("firebase-admin");
-var serviceAccount = require("../firebase.json");
+const express = require("express");
+const request = require('request');
+const router = express.Router();
+const BtSerial = require("../lib/BtSerial.js");
+const btSerial = new BtSerial();
+const Utils = require("../lib/Utils.js");
+const admin = require("firebase-admin");
+const serviceAccount = require("../firebase.json");
 
 const RESULT_OK = "OK";
 
-var _listenData = "";
-var _lastResponse = null;
+var _btDataCallback = null;
 
 btSerial.connect(function (result) {
     if (result == RESULT_OK) {
         btSerial.listen(function (data) {
-            _listenData += data;
 
+            Utils.callFunction(_btDataCallback, data);
             sendNotification(data);
-
-            if (Utils.respond(_lastResponse, 200, {data: _listenData})) {
-                _listenData = "";
-            }
         });
     }
 });
+
+router.onBtData = function(callback) {
+    _btDataCallback = callback;
+}
 
 router.get('/write', function(request, response) {
     var content = request.param("content");
@@ -36,10 +35,6 @@ router.get('/write', function(request, response) {
     btSerial.write(content, function (result) {
         Utils.respond(response, (result == RESULT_OK) ? 200 : 500, {status: result});
     });
-});
-
-router.get('/listen', function(request, response) {
-    _lastResponse = response;
 });
 
 var notificationUrls = new Array();
