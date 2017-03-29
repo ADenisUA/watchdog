@@ -21,49 +21,49 @@ class Api {
     }
 
     moveForward(callback) {
-        $.get("/api/write?content=forward", function () {
+        $.get("/api/write?content=forward+speed%3D90", function () {
             Utils.callFunction(callback);
         });
     }
 
     moveBackward(callback) {
-        $.get("/api/write?content=backward", function () {
+        $.get("/api/write?content=backward+speed%3D80", function () {
             Utils.callFunction(callback);
         });
     }
 
     turnLeft(callback) {
-        $.get("/api/write?content=left", function () {
+        $.get("/api/write?content=left+speed%3D80", function () {
             Utils.callFunction(callback);
         });
     }
 
     turnRight(callback) {
-        $.get("/api/write?content=right", function () {
+        $.get("/api/write?content=right+speed%3D80", function () {
             Utils.callFunction(callback);
         });
     }
 
     moveForwardRight(callback) {
-        $.get("/api/write?content=forwardRight", function () {
+        $.get("/api/write?content=forwardRight+speed%3D90", function () {
             Utils.callFunction(callback);
         });
     }
 
     moveForwardLeft(callback) {
-        $.get("/api/write?content=forwardLeft", function () {
+        $.get("/api/write?content=forwardLeft+speed%3D90", function () {
             Utils.callFunction(callback);
         });
     }
 
     moveBackwardRight(callback) {
-        $.get("/api/write?content=backwardRight", function () {
+        $.get("/api/write?content=backwardRight+speed%3D90", function () {
             Utils.callFunction(callback);
         });
     }
 
     moveBackwardLeft(callback) {
-        $.get("/api/write?content=backwardLeft", function () {
+        $.get("/api/write?content=backwardLeft+speed%3D90", function () {
             Utils.callFunction(callback);
         });
     }

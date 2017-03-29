@@ -42,9 +42,7 @@ class Watchdog {
                 instance.getApi().setTemperatureThreshold(TEMPERATURE_THRESHOLD, function () {
                     instance.getApi().setSoundLevelThreshold(SOUND_LEVEL_THRESHOLD, function () {
                         instance.getApi().setLightLevelThreshold(LIGHT_LEVEL_THRESHOLD, function () {
-                            instance.getApi().setSpeed(SPEED, function () {
 
-                            });
                         });
                     });
                 });

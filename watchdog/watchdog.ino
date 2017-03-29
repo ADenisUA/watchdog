@@ -103,7 +103,6 @@ uint16_t lastLightLevel = -LIGHT_LEVEL_THRESHOLD;
 float temperatureThreshold = TEMPERATURE_THRESHOLD;
 float soundLevelThreshold = SOUND_LEVEL_THRESHOLD;
 uint16_t lightLevelThreshold = LIGHT_LEVEL_THRESHOLD;
-uint8_t defaultSpeed = SPEED_DEFAULT;
 
 long lastSensorUpdateTimeStamp = 0;
 
@@ -121,7 +120,7 @@ void loop()
  * Commands processing section
  */
 
-void waitForCommand() {
+void waitForCommand() {  
   processInterruptingCommand();
   
   while (!isInterrupted()) {
@@ -139,7 +138,14 @@ boolean isInterrupted() {
     Serial.print("Received command: ");
     Serial.println(lastCommand);
     lastCommandTimeStamp = millis();
-    return !processNonInterruptingCommand();
+  }
+
+  if (lastCommand != "") {
+    if (isValidCommand()) {
+      return !processNonInterruptingCommand();
+    } else {
+      lastCommand = "";
+    }
   }
 
   return false;
@@ -161,6 +167,31 @@ boolean hasNewCommand() {
 
 boolean isCommand(String command) {
   return lastCommand.startsWith(command);
+}
+
+boolean isValidCommand() {
+  return isCommand(COMMAND_LED)
+  || isCommand(COMMAND_BEEP)
+  || isCommand(COMMAND_GET_TEMPERATURE)
+  || isCommand(COMMAND_GET_SOUND_LEVEL)
+  || isCommand(COMMAND_GET_LIGHT_LEVEL)
+  || isCommand(COMMAND_SET_TEMPERATURE_THRESHOLD)
+  || isCommand(COMMAND_SET_SOUND_LEVEL_THRESHOLD)
+  || isCommand(COMMAND_SET_LIGHT_LEVEL_THRESHOLD)
+  || isCommand(COMMAND_SET_TIMESTAMP)
+  || isCommand(COMMAND_SET_SPEED)
+  || isCommand(COMMAND_SET_POWER_SAVER_TIMEOUT)
+  || isCommand(COMMAND_STOP)
+  || isCommand(COMMAND_FIND_LIGHT)
+  || isCommand(COMMAND_NAVIGATE)
+  || isCommand(COMMAND_LEFT)
+  || isCommand(COMMAND_RIGHT)
+  || isCommand(COMMAND_FORWARD)
+  || isCommand(COMMAND_BACKWARD)
+  || isCommand(COMMAND_FORWARD_LEFT)
+  || isCommand(COMMAND_FORWARD_RIGHT)
+  || isCommand(COMMAND_BACKWARD_LEFT)
+  || isCommand(COMMAND_BACKWARD_RIGHT);
 }
 
 boolean processNonInterruptingCommand() {
@@ -222,14 +253,14 @@ boolean processNonInterruptingCommand() {
     long timestamp = getCommandParamValueLong(lastCommand, "timestamp");
     baseTimestamp = getCommandParamValueLong(lastCommand, "timestamp") - millis()/1000;
     isProcessed = true;
-  } else if (isCommand(COMMAND_SET_SPEED)) {
-    defaultSpeed = getCommandParamValueLong(lastCommand, "speed");
-    
-    isProcessed = true;
   } else if (isCommand(COMMAND_SET_POWER_SAVER_TIMEOUT)) {
     powerSaverTimeout = getCommandParamValueLong(lastCommand, "timeout");
     
     isProcessed = true;   
+  }
+
+  if (isProcessed) {
+    lastCommand = "";
   }
 
   return isProcessed;
@@ -237,6 +268,8 @@ boolean processNonInterruptingCommand() {
 
 boolean processInterruptingCommand() {
   boolean isProcessed = false;
+  int currentSpeed = getCommandParamValueLong(lastCommand, "speed");
+  currentSpeed = (currentSpeed < 0) ? SPEED_DEFAULT : currentSpeed;
 
   if (isCommand(COMMAND_FIND_LIGHT)) {
     lastCommand = "";
@@ -252,42 +285,42 @@ boolean processInterruptingCommand() {
     isProcessed = true;
   } else if (isCommand(COMMAND_BACKWARD_RIGHT)) {
     lastCommand = "";
-    BackwardAndTurnRight(defaultSpeed);
+    BackwardAndTurnRight(currentSpeed);
     executeAndStopUntilNewCommandWithDelay();
     isProcessed = true;
   } else if (isCommand(COMMAND_BACKWARD_LEFT)) {
     lastCommand = "";
-    BackwardAndTurnLeft(defaultSpeed);
+    BackwardAndTurnLeft(currentSpeed);
     executeAndStopUntilNewCommandWithDelay();
     isProcessed = true;
   } else if (isCommand(COMMAND_FORWARD_RIGHT)) {
     lastCommand = "";
-    TurnRight(defaultSpeed);
+    TurnRight(currentSpeed);
     executeAndStopUntilNewCommandWithDelay();
     isProcessed = true;
   } else if (isCommand(COMMAND_FORWARD_LEFT)) {
     lastCommand = "";
-    TurnLeft(defaultSpeed);
+    TurnLeft(currentSpeed);
     executeAndStopUntilNewCommandWithDelay();
     isProcessed = true;
   } else if (isCommand(COMMAND_FORWARD)) {
     lastCommand = "";
-    Forward(defaultSpeed);
+    Forward(currentSpeed);
     executeAndStopUntilNewCommandWithDelay();
     isProcessed = true;
   } else if (isCommand(COMMAND_BACKWARD)) {
     lastCommand = "";
-    Backward(defaultSpeed);
+    Backward(currentSpeed);
     executeAndStopUntilNewCommandWithDelay();
     isProcessed = true;
   } else if (isCommand(COMMAND_LEFT)) {
     lastCommand = "";
-    Left(defaultSpeed);
+    Left(currentSpeed);
     executeAndStopUntilNewCommandWithDelay();
     isProcessed = true;
   } else if (isCommand(COMMAND_RIGHT)) {
     lastCommand = "";
-    Right(defaultSpeed);
+    Right(currentSpeed);
     executeAndStopUntilNewCommandWithDelay();
     isProcessed = true;
   }
@@ -392,14 +425,14 @@ void modeOnTilt() {
   Serial.print(" ground=");
   Serial.println(getGroundFlag());  
 
-  Backward(defaultSpeed);
+  Backward(SPEED_DEFAULT);
   
   delay(DELAY_MICRO);
 
   if (getRandomDirection() < 1) {
-    BackwardAndTurnRight(defaultSpeed);
+    BackwardAndTurnRight(SPEED_DEFAULT);
   } else {
-    BackwardAndTurnLeft(defaultSpeed);
+    BackwardAndTurnLeft(SPEED_DEFAULT);
   }  
   
   do {     
@@ -434,14 +467,14 @@ void modeObstacleIsTooClose() {
   Serial.print(" distance=");
   Serial.println(obstacleProximity);
 
-  Backward(defaultSpeed);
+  Backward(SPEED_DEFAULT);
   
   delay(DELAY_MICRO);
   
   if (getRandomDirection() < 1) {
-    Right(defaultSpeed);
+    Right(SPEED_DEFAULT);
   } else {
-    Left(defaultSpeed);
+    Left(SPEED_DEFAULT);
   }
  
   do {
@@ -479,12 +512,12 @@ void modeAvoidObstacle() {
   Serial.print(" distance=");
   Serial.println(obstacleProximity);
   
-  //moveWithTurn(defaultSpeed, getRandomDirection());
+  //moveWithTurn(SPEED_DEFAULT, getRandomDirection());
 
   if (getRandomDirection() < 1) {
-    TurnRight(defaultSpeed);
+    TurnRight(SPEED_DEFAULT);
   } else {
-    TurnLeft(defaultSpeed);
+    TurnLeft(SPEED_DEFAULT);
   }
 
   do {
@@ -526,7 +559,7 @@ void modeContinueNavigation() {
 
   } else {
     
-    Forward(defaultSpeed);
+    Forward(SPEED_DEFAULT);
   }  
 }
 
@@ -535,14 +568,14 @@ void modeContinueNavigation() {
  */
 void modeStuck() {
   
-  Backward(defaultSpeed);
+  Backward(SPEED_DEFAULT);
   
   delay(DELAY_DEFAULT);
   
   if (getRandomDirection() < 1) {
-    BackwardAndTurnRight(defaultSpeed);
+    BackwardAndTurnRight(SPEED_DEFAULT);
   } else {
-    BackwardAndTurnLeft(defaultSpeed);
+    BackwardAndTurnLeft(SPEED_DEFAULT);
   }
   
   delay(DELAY_DEFAULT*2);
@@ -569,9 +602,9 @@ boolean commandFindLightDirection() {
 //  Serial.println(lightLevel);
 
   if (lightBalance < 1) {
-    Right(defaultSpeed);
+    Right(SPEED_DEFAULT);
   } else {
-    Left(defaultSpeed);
+    Left(SPEED_DEFAULT);
   } 
   
   do {
@@ -603,7 +636,7 @@ boolean commandFindLightDirection() {
 
   delay(DELAY_DEFAULT);
 
-  turnToAngle(defaultSpeed, maxLightLevelDirection);
+  turnToAngle(SPEED_DEFAULT, maxLightLevelDirection);
 }
 
 /**
