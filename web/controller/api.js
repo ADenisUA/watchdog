@@ -18,7 +18,7 @@ router.get('/register', function(request, response) {
 
     Brain.getInstance().addListener(url);
 
-    response.status(200).json({status: "OK"});
+    response.status(200).json({status: Brain.RESULT_OK});
 });
 
 module.exports = router;

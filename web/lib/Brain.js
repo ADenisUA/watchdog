@@ -58,7 +58,7 @@ module.exports = class Brain {
         });
     }
 
-    addNotificationListener(url) {
+    addListener(url) {
         if (notificationUrls.indexOf(url) === -1) {
             console.log("registering url: "+ url);
             notificationUrls.push(url);
