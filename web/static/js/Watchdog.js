@@ -61,11 +61,11 @@ class Watchdog {
             try {
                 var id = null;
                 if (data.indexOf("onTemperature") > -1) {
-                    id = "temperature";
+                    id = "#temperature";
                 } else if (data.indexOf("onSoundLevel") > -1) {
-                    id = "sound";
+                    id = "#sound";
                 } else if (data.indexOf("onLightLevel") > -1) {
-                    id = "light";
+                    id = "#light";
                 }
 
                 if (id != null) {
