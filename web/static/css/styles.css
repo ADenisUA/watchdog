@@ -139,11 +139,11 @@ button.js-push-button {
 }
 #streamingContainer #sound {
     left: 10px;
-    bottom: 80px;
+    bottom: 70px;
     color: green;
 }
 #streamingContainer #light {
     left: 10px;
-    bottom: 150px;
+    bottom: 130px;
     color: yellow;
 }

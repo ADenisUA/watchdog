@@ -694,7 +694,7 @@ float getGyroZ() {
 }
 
 uint16_t getObstacleProximity() {
-  return us->distanceCm();
+  return us -> distanceCm();
 }
 
 uint8_t getGroundFlag() {

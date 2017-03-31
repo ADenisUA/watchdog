@@ -13,6 +13,7 @@ module.exports = function BtSerial() {
     const RESULT_ERROR_CONNECTION_FAILURE = "Unable to connect";
     const RESULT_ERROR_WRITE_ERROR = "Write error";
     const RESULT_ERROR_WRITE_TIMEOUT = "Write timeout";
+    const RESULT_ERROR_CONNECTION_CLOSED = "BT connection is closed";
     const RESULT_OK = "OK";
     const WRITE_TIMEOUT = 3000;
 
@@ -63,11 +64,11 @@ module.exports = function BtSerial() {
     });
 
     btSerial.on('closed', function() {
-        console.log("BT connection is closed");
+        console.log(RESULT_ERROR_CONNECTION_CLOSED);
 
         _resetWriteQueue();
 
-        Utils.callFunction(_listenCallback, "BT connection is closed");
+        Utils.callFunction(_listenCallback, RESULT_ERROR_CONNECTION_CLOSED);
     });
 
     btSerial.on('failure', function(error) {
