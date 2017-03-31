@@ -1,11 +1,12 @@
 "use strict";
 
-var btSerial = new (require('bluetooth-serial-port')).BluetoothSerialPort();
-var Utils = require("./Utils.js");
+const btSerial = new (require('bluetooth-serial-port')).BluetoothSerialPort();
+const Utils = require("./Utils.js");
+const Brain = require("./Brain.js");
 
 module.exports = function BtSerial() {
-    var _this = this;
-    var _listenCallback = null;
+    const _this = this;
+    let _listenCallback = null;
     const DEVICE_NAME = "Makeblock";
     const DEVICE_ADDRESS = "00:0D:19:70:12:2C";
 
@@ -13,13 +14,12 @@ module.exports = function BtSerial() {
     const RESULT_ERROR_CONNECTION_FAILURE = "Unable to connect";
     const RESULT_ERROR_WRITE_ERROR = "Write error";
     const RESULT_ERROR_WRITE_TIMEOUT = "Write timeout";
-    const RESULT_OK = "OK";
     const WRITE_TIMEOUT = 3000;
 
-    var _writeQueue = new Array();
-    var _writeIsInProgress = false;
-    var _lastCommand = null;
-    var _writeTimer = null;
+    let _writeQueue = [];
+    let _writeIsInProgress = false;
+    let _lastCommand = null;
+    let _writeTimer = null;
 
     // btSerial.on('found', function found(address, name){
     //     console.log('Discovered BT device ' + name + ' ' + address);
@@ -34,32 +34,32 @@ module.exports = function BtSerial() {
     //     }
     // });
 
-    var _resetLastCommand = function () {
+    let _resetLastCommand = function () {
         _lastCommand = null;
         _writeIsInProgress = false;
     };
 
-    var _resetWriteQueue = function() {
+    let _resetWriteQueue = function() {
         _resetLastCommand();
-        _writeQueue = new Array();
-    }
+        _writeQueue = [];
+    };
 
-    var _clearWriteTimer = function() {
+    let _clearWriteTimer = function() {
         if (_writeTimer) {
             clearTimeout(_writeTimer);
         }
     };
 
     btSerial.on('data', function(buffer) {
-        var data = buffer.toString('utf-8');
+        let data = buffer.toString('utf-8');
         console.log("Received data:", data);
+        Utils.callFunction(_listenCallback, data);
+
         if (_lastCommand && data.indexOf(_lastCommand) > -1) {
             _clearWriteTimer();
             _resetLastCommand();
             _processNextWriteQueueElement();
         }
-
-        Utils.callFunction(_listenCallback, data);
     });
 
     btSerial.on('closed', function() {
@@ -118,7 +118,7 @@ module.exports = function BtSerial() {
         _connect(DEVICE_NAME, DEVICE_ADDRESS, callback);
     };
 
-    var _connect = function(name, address, callback) {
+    let _connect = function(name, address, callback) {
         _resetWriteQueue();
 
         if (name.indexOf(DEVICE_NAME) > -1) {
@@ -146,7 +146,7 @@ module.exports = function BtSerial() {
         return false;
     };
 
-    var _write = function (content, callback) {
+    let _write = function (content, callback) {
 
         console.log("Attempting to write", content);
 
@@ -178,19 +178,19 @@ module.exports = function BtSerial() {
         });
     };
 
-    var _processNextWriteQueueElement = function () {
+    let _processNextWriteQueueElement = function () {
         if (_writeQueue.length > 0) {
-            var nextCommand = _writeQueue.shift();
+            let nextCommand = _writeQueue.shift();
             _write(nextCommand.content, nextCommand.callback);
         }
-    }
+    };
 
     this.write = function(content, callback) {
         if (!btSerial.isOpen()) {
             console.log("BT connection is closed. Reconnecting");
 
             _this.connect(function (result) {
-                if (result == RESULT_OK) {
+                if (result === Brain.RESULT_OK) {
                     _write(content, callback);
                 } else {
                     Utils.callFunction(callback, result);

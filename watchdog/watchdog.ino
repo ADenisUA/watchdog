@@ -120,7 +120,7 @@ void loop()
  * Commands processing section
  */
 
-void waitForCommand() {  
+void waitForCommand() {
   processInterruptingCommand();
   
   while (!isInterrupted()) {
@@ -221,20 +221,17 @@ boolean processNonInterruptingCommand() {
     isProcessed = true;
   } else if (isCommand(COMMAND_GET_TEMPERATURE)) {
 
-    lastTemperature = -temperatureThreshold;
-    checkTemperature();
+    Serial.println(generateEventJson(EVENT_TEMPERATURE, "temperature", getTemperature()));
 
     isProcessed = true;
   } else if (isCommand(COMMAND_GET_SOUND_LEVEL)) {
 
-    lastSoundLevel = -soundLevelThreshold;
-    checkSoundLevel();
+    Serial.println(generateEventJson(EVENT_SOUND_LEVEL, "soundLevel", getSoundLevel()));
 
     isProcessed = true;
   } else if (isCommand(COMMAND_GET_LIGHT_LEVEL)) {
 
-    lastLightLevel = -lightLevelThreshold;
-    checkLightLevel();
+    Serial.println(generateEventJson(EVENT_LIGHT_LEVEL, "lightLevel", getLightLevel()));
 
     isProcessed = true;
   } else if (isCommand(COMMAND_SET_TEMPERATURE_THRESHOLD)) {
@@ -705,11 +702,11 @@ uint8_t getGroundFlag() {
 }
 
 uint16_t getLightLevelLeft() {
-  return lightsensor_12.read(); //light left
+  return (uint16_t)lightsensor_12.read(); //light left
 }
 
 uint16_t getLightLevelRight() {
-  return lightsensor_11.read(); //light right
+  return (uint16_t)lightsensor_11.read(); //light right
 }
 
 /**
@@ -730,8 +727,8 @@ float getLightBalance() {
   return (float)lightLevelLeft/(float)lightLevelRight;
 }
 
-float getLightLevel() {
-  return sqrt(getLightLevelLeft()*getLightLevelRight());
+uint16_t getLightLevel() {
+  return (uint16_t)sqrt(((long)getLightLevelLeft())*((long)getLightLevelRight()));
 }
 
 /**

@@ -12,19 +12,19 @@ class Watchdog {
     constructor() {
         console.log("Watchdog started");
 
-        var _api = new Api();
+        let _api = new Api();
 
         this.getApi = function() {
             return _api;
-        }
+        };
 
 
-        var _isStreaming = false;
-        var _isLedOn = false;
+        let _isStreaming = false;
+        let _isLedOn = false;
 
         this.setIsStreaming = function(value) {
             _isStreaming = value;
-        }
+        };
 
         this.isStreaming = function() {
             return _isStreaming;
