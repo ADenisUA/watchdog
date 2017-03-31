@@ -70,8 +70,7 @@ class Watchdog {
 
                 if (id != null) {
                     data = JSON.parse(data.substring(data.indexOf("{")));
-                    console.log(data);
-                    $(id).html(data.value);
+                    $(id).html(parseInt(data.value));
                 }
             } catch (e) {
                 console.log("Unable to parse incoming event", e);
