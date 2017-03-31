@@ -22,6 +22,7 @@ module.exports = class Brain {
         console.log("Brain started");
 
         let webSocket = null;
+        let _this = this;
 
         btSerial.connect(function (result) {
             if (result === Brain.RESULT_OK) {
@@ -30,7 +31,7 @@ module.exports = class Brain {
                         webSocket.write(data);
                     }
 
-                    this.sendNotification(data);
+                    _this.sendNotification(data);
                 });
             }
         });
