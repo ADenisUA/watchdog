@@ -24,11 +24,14 @@ module.exports = class WebSockets {
         });
 
         this.write = function(data) {
+            let result = false;
             for (let i in connections) {
                 if (connections[i] && connections[i].readyState === connections[i].OPEN) {
                     connections[i].send(data);
+                    result = true;
                 }
             }
+            return result;
         }
     }
 };

@@ -3,8 +3,8 @@
 let instance;
 
 const TEMPERATURE_THRESHOLD = 1;
-const SOUND_LEVEL_THRESHOLD = 400;
-const LIGHT_LEVEL_THRESHOLD = 250;
+const SOUND_LEVEL_THRESHOLD = 150;
+const LIGHT_LEVEL_THRESHOLD = 50;
 const SPEED = 90;
 
 class Watchdog {
@@ -17,7 +17,6 @@ class Watchdog {
         this.getApi = function() {
             return _api;
         };
-
 
         let _isStreaming = false;
         let _isLedOn = false;
@@ -36,13 +35,39 @@ class Watchdog {
             instance = new Watchdog();
             instance.getApi().listen(function(data) {
                 $("#output").html(data);
+
+                if (data) {
+                    try {
+                        var id = null;
+                        if (data.indexOf("onTemperature")) {
+                            id = "temperature";
+                        } else if (data.indexOf("onSoundLevel")) {
+                            id = "sound";
+                        } else if (data.indexOf("onLightLevel")) {
+                            id = "light";
+                        }
+
+                        if (id != null) {
+                            data = JSON.parse(data);
+                            $(id).html(data.value);
+                        }
+                    } catch (e) {
+                        console.log("Unable to parse incoming event", e);
+                    }
+                }
             });
 
             instance.getApi().setTimestamp((Math.round(new Date().getTime()/1000)), function () {
                 instance.getApi().setTemperatureThreshold(TEMPERATURE_THRESHOLD, function () {
                     instance.getApi().setSoundLevelThreshold(SOUND_LEVEL_THRESHOLD, function () {
                         instance.getApi().setLightLevelThreshold(LIGHT_LEVEL_THRESHOLD, function () {
+                            instance.getApi().getTemperature(function () {
+                                instance.getApi().getSoundLevel(function () {
+                                    instance.getApi().getLightLevel(function () {
 
+                                    });
+                                });
+                            });
                         });
                     });
                 });

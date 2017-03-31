@@ -27,11 +27,16 @@ module.exports = class Brain {
         btSerial.connect(function (result) {
             if (result === Brain.RESULT_OK) {
                 btSerial.listen(function (data) {
+                    let result = false;
+
                     if (webSocket !== null) {
-                        webSocket.write(data);
+                        result = webSocket.write(data);
                     }
 
-                    _this.sendNotification(data);
+                    if (!result) {
+                        console.log("Unable to find active connection. Trying to send notification");
+                        _this.sendNotification(data);
+                    }
                 });
             }
         });
