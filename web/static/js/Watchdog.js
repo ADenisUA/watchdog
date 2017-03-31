@@ -64,7 +64,7 @@ class Watchdog {
                 previousData = data;
                 return;
             } else if (data.indexOf("{") === -1 && data.indexOf("}") > -1) {
-                data += previousData;
+                data = previousData + data;
             }
             previousData = "";
             try {
