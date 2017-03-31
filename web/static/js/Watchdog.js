@@ -33,29 +33,7 @@ class Watchdog {
     static getInstance() {
         if (!instance) {
             instance = new Watchdog();
-            instance.getApi().listen(function(data) {
-                $("#output").html(data);
-
-                if (data) {
-                    try {
-                        var id = null;
-                        if (data.indexOf("onTemperature")) {
-                            id = "temperature";
-                        } else if (data.indexOf("onSoundLevel")) {
-                            id = "sound";
-                        } else if (data.indexOf("onLightLevel")) {
-                            id = "light";
-                        }
-
-                        if (id != null) {
-                            data = JSON.parse(data);
-                            $(id).html(data.value);
-                        }
-                    } catch (e) {
-                        console.log("Unable to parse incoming event", e);
-                    }
-                }
-            });
+            instance.getApi().listen(instance.processIncomingData);
 
             instance.getApi().setTimestamp((Math.round(new Date().getTime()/1000)), function () {
                 instance.getApi().setTemperatureThreshold(TEMPERATURE_THRESHOLD, function () {
@@ -74,6 +52,30 @@ class Watchdog {
             });
         }
         return instance;
+    }
+
+    processIncomingData(data) {
+        $("#output").html(data);
+
+        if (data) {
+            try {
+                var id = null;
+                if (data.indexOf("onTemperature")) {
+                    id = "temperature";
+                } else if (data.indexOf("onSoundLevel")) {
+                    id = "sound";
+                } else if (data.indexOf("onLightLevel")) {
+                    id = "light";
+                }
+
+                if (id != null) {
+                    data = JSON.parse(data.substring(data.indexOf("{")));
+                    $(id).html(data.value);
+                }
+            } catch (e) {
+                console.log("Unable to parse incoming event", e);
+            }
+        }
     }
 
     toggleStreaming() {
