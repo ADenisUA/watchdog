@@ -3,8 +3,8 @@
 let instance;
 
 const TEMPERATURE_THRESHOLD = 1;
-const SOUND_LEVEL_THRESHOLD = 150;
-const LIGHT_LEVEL_THRESHOLD = 50;
+const SOUND_LEVEL_THRESHOLD = 100;
+const LIGHT_LEVEL_THRESHOLD = 35;
 const SPEED = 90;
 
 class Watchdog {
