@@ -42,7 +42,9 @@ module.exports = class Brain {
         }
     }
 
-    static get RESULT_OK() {return "OK"};
+    static get RESULT_OK() {
+        return "OK";
+    };
 
     static getInstance() {
         if (!instance) {
@@ -53,9 +55,7 @@ module.exports = class Brain {
     }
 
     write(content, callback) {
-        btSerial.write(content, function (result) {
-            Utils.callFunction(callback, result);
-        });
+        btSerial.write(content, callback);
     }
 
     addListener(url) {

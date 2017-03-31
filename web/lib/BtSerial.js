@@ -2,7 +2,6 @@
 
 const btSerial = new (require('bluetooth-serial-port')).BluetoothSerialPort();
 const Utils = require("./Utils.js");
-const Brain = require("./Brain.js");
 
 module.exports = function BtSerial() {
     const _this = this;
@@ -14,6 +13,7 @@ module.exports = function BtSerial() {
     const RESULT_ERROR_CONNECTION_FAILURE = "Unable to connect";
     const RESULT_ERROR_WRITE_ERROR = "Write error";
     const RESULT_ERROR_WRITE_TIMEOUT = "Write timeout";
+    const RESULT_OK = "OK";
     const WRITE_TIMEOUT = 3000;
 
     let _writeQueue = [];
@@ -173,7 +173,7 @@ module.exports = function BtSerial() {
                 Utils.callFunction(callback, RESULT_ERROR_WRITE_ERROR);
             } else {
                 console.log("Written", content);
-                Utils.callFunction(callback, Brain.RESULT_OK);
+                Utils.callFunction(callback, RESULT_OK);
             }
         });
     };
@@ -190,7 +190,7 @@ module.exports = function BtSerial() {
             console.log("BT connection is closed. Reconnecting");
 
             _this.connect(function (result) {
-                if (result === Brain.RESULT_OK) {
+                if (result === RESULT_OK) {
                     _write(content, callback);
                 } else {
                     Utils.callFunction(callback, result);
