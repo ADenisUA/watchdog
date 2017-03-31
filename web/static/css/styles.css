@@ -133,17 +133,17 @@ button.js-push-button {
 }
 
 #streamingContainer #temperature {
-    left: 100px;
+    left: 10px;
     bottom: 10px;
     color: red;
 }
 #streamingContainer #sound {
     left: 10px;
-    bottom: 10px;
+    bottom: 80px;
     color: green;
 }
 #streamingContainer #light {
-    left: 190px;
-    bottom: 10px;
+    left: 10px;
+    bottom: 150px;
     color: yellow;
 }
