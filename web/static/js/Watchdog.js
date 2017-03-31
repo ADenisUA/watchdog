@@ -69,6 +69,7 @@ class Watchdog {
                 }
 
                 if (id != null) {
+                    console.log(data.substring(data.indexOf("{")));
                     data = JSON.parse(data.substring(data.indexOf("{")));
                     $(id).html(data.value);
                 }
