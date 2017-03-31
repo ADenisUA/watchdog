@@ -60,17 +60,17 @@ class Watchdog {
         if (data) {
             try {
                 var id = null;
-                if (data.indexOf("onTemperature")) {
+                if (data.indexOf("onTemperature") > -1) {
                     id = "temperature";
-                } else if (data.indexOf("onSoundLevel")) {
+                } else if (data.indexOf("onSoundLevel") > -1) {
                     id = "sound";
-                } else if (data.indexOf("onLightLevel")) {
+                } else if (data.indexOf("onLightLevel") > -1) {
                     id = "light";
                 }
 
                 if (id != null) {
-                    console.log(data.substring(data.indexOf("{")));
                     data = JSON.parse(data.substring(data.indexOf("{")));
+                    console.log(data);
                     $(id).html(data.value);
                 }
             } catch (e) {
