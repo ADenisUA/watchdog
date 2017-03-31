@@ -173,7 +173,7 @@ module.exports = function BtSerial() {
                 Utils.callFunction(callback, RESULT_ERROR_WRITE_ERROR);
             } else {
                 console.log("Written", content);
-                Utils.callFunction(callback, RESULT_OK);
+                Utils.callFunction(callback, Brain.RESULT_OK);
             }
         });
     };
