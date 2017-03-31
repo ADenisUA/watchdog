@@ -5,7 +5,7 @@ const BtSerial = require("../lib/BtSerial.js");
 const btSerial = new BtSerial();
 const admin = require("firebase-admin");
 const serviceAccount = require("../firebase.json");
-const api = require('../controller/api');
+
 const WebSockets = require('./WebSockets.js');
 
 admin.initializeApp({
@@ -52,7 +52,7 @@ module.exports = class Brain {
         return instance;
     }
 
-    write(callback) {
+    write(content, callback) {
         btSerial.write(content, function (result) {
             Utils.callFunction(callback, result);
         });

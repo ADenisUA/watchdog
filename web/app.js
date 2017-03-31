@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const app = express();
 const Brain = require('./lib/Brain.js');
+const api = require('./controller/api');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -16,7 +17,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'static')));
-app.use('/api/', Brain.getInstance().getApi());
+app.use('/api/', api);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
