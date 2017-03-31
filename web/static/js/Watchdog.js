@@ -7,6 +7,8 @@ const SOUND_LEVEL_THRESHOLD = 100;
 const LIGHT_LEVEL_THRESHOLD = 35;
 const SPEED = 90;
 
+let previousData = "";
+
 class Watchdog {
 
     constructor() {
@@ -58,6 +60,13 @@ class Watchdog {
         $("#output").html(data);
 
         if (data) {
+            if (data.indexOf("{") > -1 && data.indexOf("}") === -1) {
+                previousData = data;
+                return;
+            } else if (data.indexOf("{") === -1 && data.indexOf("}") > -1) {
+                data += previousData;
+            }
+            previousData = "";
             try {
                 var id = null;
                 if (data.indexOf("onTemperature") > -1) {
