@@ -69,17 +69,21 @@ class Watchdog {
             previousData = "";
             try {
                 var id = null;
+                var suffix = "";
                 if (data.indexOf("onTemperature") > -1) {
                     id = "#temperature";
+                    suffix = "&#8451;";
                 } else if (data.indexOf("onSoundLevel") > -1) {
                     id = "#sound";
+                    suffix = "db";
                 } else if (data.indexOf("onLightLevel") > -1) {
                     id = "#light";
+                    suffix = "lm";
                 }
 
                 if (id != null) {
                     data = JSON.parse(data.substring(data.indexOf("{")));
-                    $(id).html(parseInt(data.value));
+                    $(id).html(parseInt(data.value)+suffix);
                 }
             } catch (e) {
                 console.log("Unable to parse incoming event", e);
