@@ -1,31 +1,36 @@
 #output {
-    width: 640px;
-    position: relative;
+    width: 350px;
+    position: absolute;
+    bottom: 10px;
+    left: 70px;
     display: block;
-    margin: 10px;
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
+    margin: 0;
+    padding: 0;
     height: 160px;
     overflow-x: hidden;
     overflow-y: auto;
     white-space: pre-wrap;
+    font-size: 10px;
 }
 
 #streamingContainer {
-    width: 640px;
+    width: 800px;
     height: 480px;
     background-color: #000;
     position: relative;
-    margin: 10px;
+    margin: 0;
     margin-left: auto;
     margin-right: auto;
     display: block;
 }
 
 #streamingView {
-    width: 100%;
-    height: 100%;
+    width: 640px;
+    height: 480px;
+    margin: 0;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
 }
 
 #streamingContainer a,
@@ -127,7 +132,7 @@ button.js-push-button {
 
 #streamingContainer .indicator {
     position: absolute;
-    font-size: 50px;
+    font-size: 30px;
     text-align: center;
     vertical-align: middle;
 }
@@ -139,11 +144,11 @@ button.js-push-button {
 }
 #streamingContainer #sound {
     left: 10px;
-    bottom: 70px;
+    bottom: 40px;
     color: green;
 }
 #streamingContainer #light {
     left: 10px;
-    bottom: 130px;
+    bottom: 70px;
     color: yellow;
 }

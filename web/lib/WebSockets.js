@@ -19,7 +19,8 @@ module.exports = class WebSockets {
             });
 
             connection.on('close', function() {
-                console.log('disconnected', connection);
+                const location = url.parse(connection.upgradeReq.url, true);
+                console.log('disconnected', location);
             });
         });
 

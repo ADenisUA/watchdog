@@ -4,7 +4,7 @@
   "start_url": "/watchdog.html",
   "display": "standalone",
   "lang": "en-US",
-  "orientation": "portrait",
+  "orientation": "landscape",
   "background_color": "#fff",
   "description": "Watchdog guards your apartment",
   "icons": [{
