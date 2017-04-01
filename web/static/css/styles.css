@@ -3,14 +3,14 @@ body {
 }
 
 #output {
-    width: 450px;
+    width: 500px;
     position: absolute;
     bottom: 10px;
-    left: 100px;
+    left: 120px;
     display: block;
     margin: 0;
     padding: 0;
-    height: 100px;
+    height: 50px;
     overflow-x: hidden;
     overflow-y: auto;
     white-space: pre-wrap;
