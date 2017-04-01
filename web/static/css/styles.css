@@ -6,11 +6,13 @@
     display: block;
     margin: 0;
     padding: 0;
-    height: 160px;
+    height: 100px;
     overflow-x: hidden;
     overflow-y: auto;
     white-space: pre-wrap;
-    font-size: 10px;
+    font-size: 14px;
+    color: #fff;
+    text-shadow: black;
 }
 
 #streamingContainer {
