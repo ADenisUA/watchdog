@@ -54,13 +54,14 @@ module.exports = function BtSerial() {
     btSerial.on('data', function(buffer) {
         let data = buffer.toString('utf-8');
         console.log("Received data:", data);
-        Utils.callFunction(_listenCallback, data);
 
         if (_lastCommand && data.indexOf(_lastCommand) > -1) {
             _clearWriteTimer();
             _resetLastCommand();
             _processNextWriteQueueElement();
         }
+
+        Utils.callFunction(_listenCallback, data);
     });
 
     btSerial.on('closed', function() {
