@@ -68,7 +68,7 @@ function startWebRtc() {
                 command_id: "offer",
                 options: {
                     force_hw_vcodec: false,
-                    vformat: 60
+                    vformat: 30
                 }
             };
             ws.send(JSON.stringify(command));
@@ -268,7 +268,7 @@ function onRemoteStreamRemoved(event) {
 
 function onRemoteStreamAdded(event) {
     var url = URL.createObjectURL(event.stream);
-    url = url.replace("http://localhost:8080", "http://" + signalling_server_hostname + ":3001");
+    //url = url.replace("http://localhost:8080", "http://" + signalling_server_hostname + ":3001");
     console.log("Remote stream added:", url, event);
     var remoteVideoElement = document.getElementById('streamingView');
     remoteVideoElement.src = url;
