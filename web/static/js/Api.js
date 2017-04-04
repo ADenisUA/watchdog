@@ -179,6 +179,14 @@ class Api {
                     Utils.callFunction(callback, event.data);
                 }
             }
+
+            ws.onclose = function (event) {
+                console.log("ws onclose", event);
+            }
+
+            ws.onerror = function (event) {
+                console.log("ws onerror", event);
+            }
         };
     }
 
