@@ -68,7 +68,7 @@ function startWebRtc() {
             var command = {
                 command_id: "offer",
                 options: {
-                    force_hw_vcodec: false,
+                    force_hw_vcodec: !isMobile(),
                     vformat: 30
                 }
             };
@@ -274,4 +274,20 @@ function onRemoteStreamAdded(event) {
     var remoteVideoElement = document.getElementById('streamingView');
     remoteVideoElement.src = url;
     remoteVideoElement.play();
+}
+
+function isMobile() {
+    if( navigator.userAgent.match(/Android/i)
+        || navigator.userAgent.match(/webOS/i)
+        || navigator.userAgent.match(/iPhone/i)
+        || navigator.userAgent.match(/iPad/i)
+        || navigator.userAgent.match(/iPod/i)
+        || navigator.userAgent.match(/BlackBerry/i)
+        || navigator.userAgent.match(/Windows Phone/i)
+    ){
+        return true;
+    }
+    else {
+        return false;
+    }
 }
