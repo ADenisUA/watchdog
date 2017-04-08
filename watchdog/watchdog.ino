@@ -53,8 +53,8 @@
 //constants
 #define ANGLE_SENSITIVITY           5
 #define TEMPERATURE_THRESHOLD       1.00f
-#define SOUND_LEVEL_THRESHOLD       300.00f
-#define LIGHT_LEVEL_THRESHOLD       400
+#define SOUND_LEVEL_THRESHOLD       2.00f
+#define LIGHT_LEVEL_THRESHOLD       2
 #define POWER_SAVER_TIMEOUT         60000
 
 #define SPEED_DEFAULT               100
@@ -248,7 +248,7 @@ boolean processNonInterruptingCommand() {
     isProcessed = true;
   } else if (isCommand(COMMAND_SET_TIMESTAMP)) {
     long timestamp = getCommandParamValueLong(lastCommand, "timestamp");
-    baseTimestamp = getCommandParamValueLong(lastCommand, "timestamp") - millis()/1000;
+    baseTimestamp = timestamp - millis()/1000;
     isProcessed = true;
   } else if (isCommand(COMMAND_SET_POWER_SAVER_TIMEOUT)) {
     powerSaverTimeout = getCommandParamValueLong(lastCommand, "timeout");
@@ -350,7 +350,7 @@ void checkTemperature() {
 
 void checkSoundLevel() {
   float currentSoundLevel = getSoundLevel();
-  if (!equalsWithinRange(lastSoundLevel, currentSoundLevel, soundLevelThreshold)) {
+  if (lastSoundLevel != currentSoundLevel || lastSoundLevel == 0 || currentSoundLevel == 0 || (currentSoundLevel/lastSoundLevel > soundLevelThreshold) || (lastSoundLevel/currentSoundLevel > soundLevelThreshold)) {
     lastSoundLevel = currentSoundLevel;
     Serial.println(generateEventJson(EVENT_SOUND_LEVEL, "soundLevel", currentSoundLevel));
   }
@@ -358,7 +358,7 @@ void checkSoundLevel() {
 
 void checkLightLevel() {
   uint16_t currentLightLevel = getLightLevel();
-  if (!equalsWithinRange(lastLightLevel, currentLightLevel, lightLevelThreshold)) {
+  if (lastLightLevel != currentLightLevel || lastLightLevel == 0 || currentLightLevel == 0 || (currentLightLevel/lastLightLevel > lightLevelThreshold) || (lastLightLevel/currentLightLevel > lightLevelThreshold)) {
     lastLightLevel = currentLightLevel;
     Serial.println(generateEventJson(EVENT_LIGHT_LEVEL, "lightLevel", currentLightLevel));   
   }
@@ -884,6 +884,10 @@ String getCommandParamValue(String command, String paramName) {
   }
 
   return paramValue;
+}
+
+boolean hasCommanParam(String command, String paramName) {
+  return command.indexOf(paramName + "=") > -1;
 }
 
 long getCommandParamValueLong(String command, String paramName) {
