@@ -3,8 +3,8 @@
 let instance;
 
 const TEMPERATURE_THRESHOLD = 2;
-const SOUND_LEVEL_RATIO_THRESHOLD = 1.5;
-const LIGHT_LEVEL_RATIO_THRESHOLD = 1.5;
+const SOUND_LEVEL_RATIO_THRESHOLD = 1.1;
+const LIGHT_LEVEL_RATIO_THRESHOLD = 1.1;
 const SPEED = 90;
 
 let previousData = "";
