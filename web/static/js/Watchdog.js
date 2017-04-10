@@ -3,8 +3,8 @@
 let instance;
 
 const TEMPERATURE_THRESHOLD = 2;
-const SOUND_LEVEL_THRESHOLD = 2;
-const LIGHT_LEVEL_THRESHOLD = 2;
+const SOUND_LEVEL_RATIO_THRESHOLD = 1.5;
+const LIGHT_LEVEL_RATIO_THRESHOLD = 1.5;
 const SPEED = 90;
 
 let previousData = "";
@@ -39,8 +39,8 @@ class Watchdog {
 
             instance.getApi().setTimestamp((Math.round(new Date().getTime()/1000)), function () {
                 instance.getApi().setTemperatureThreshold(TEMPERATURE_THRESHOLD, function () {
-                    instance.getApi().setSoundLevelThreshold(SOUND_LEVEL_THRESHOLD, function () {
-                        instance.getApi().setLightLevelThreshold(LIGHT_LEVEL_THRESHOLD, function () {
+                    instance.getApi().setSoundLevelThreshold(SOUND_LEVEL_RATIO_THRESHOLD, function () {
+                        instance.getApi().setLightLevelThreshold(LIGHT_LEVEL_RATIO_THRESHOLD, function () {
                             instance.getApi().getTemperature(function () {
                                 instance.getApi().getSoundLevel(function () {
                                     instance.getApi().getLightLevel(function () {

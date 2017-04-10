@@ -350,7 +350,7 @@ void checkTemperature() {
 
 void checkSoundLevel() {
   float currentSoundLevel = getSoundLevel();
-  if (lastSoundLevel != currentSoundLevel || lastSoundLevel == 0 || currentSoundLevel == 0 || (currentSoundLevel/lastSoundLevel > soundLevelThreshold) || (lastSoundLevel/currentSoundLevel > soundLevelThreshold)) {
+  if (!equalsWithinRange(lastSoundLevel, currentSoundLevel, 15) && (lastSoundLevel == 0 || currentSoundLevel == 0 || (currentSoundLevel/lastSoundLevel > soundLevelThreshold) || (lastSoundLevel/currentSoundLevel > soundLevelThreshold))) {
     lastSoundLevel = currentSoundLevel;
     Serial.println(generateEventJson(EVENT_SOUND_LEVEL, "soundLevel", currentSoundLevel));
   }
@@ -358,7 +358,7 @@ void checkSoundLevel() {
 
 void checkLightLevel() {
   uint16_t currentLightLevel = getLightLevel();
-  if (lastLightLevel != currentLightLevel || lastLightLevel == 0 || currentLightLevel == 0 || (currentLightLevel/lastLightLevel > lightLevelThreshold) || (lastLightLevel/currentLightLevel > lightLevelThreshold)) {
+  if (!equalsWithinRange(lastLightLevel, currentLightLevel, 15) && (lastLightLevel == 0 || currentLightLevel == 0 || (currentLightLevel/lastLightLevel > lightLevelThreshold) || (lastLightLevel/currentLightLevel > lightLevelThreshold))) {
     lastLightLevel = currentLightLevel;
     Serial.println(generateEventJson(EVENT_LIGHT_LEVEL, "lightLevel", currentLightLevel));   
   }
