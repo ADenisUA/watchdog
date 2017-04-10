@@ -38,6 +38,8 @@ module.exports = function BtSerial() {
     let _resetLastCommand = function () {
         _lastCommand = null;
         _writeIsInProgress = false;
+
+        _clearWriteTimer();
     };
 
     let _resetWriteQueue = function() {
@@ -56,7 +58,6 @@ module.exports = function BtSerial() {
         console.log("Received data:", data);
 
         if (_lastCommand && data.indexOf(_lastCommand) > -1) {
-            _clearWriteTimer();
             _resetLastCommand();
             _processNextWriteQueueElement();
         }
@@ -157,14 +158,15 @@ module.exports = function BtSerial() {
             _writeQueue.push({content: content, callback: callback});
             return;
         } else {
-            _clearWriteTimer();
+            _resetLastCommand();
 
             _writeIsInProgress = true;
             _lastCommand = content;
 
             _writeTimer = setTimeout(function() {
                 console.log("Write timeout:", _lastCommand);
-                _resetWriteQueue();
+                _resetLastCommand();
+                _processNextWriteQueueElement();
                 Utils.callFunction(callback, RESULT_ERROR_WRITE_TIMEOUT);
             }, WRITE_TIMEOUT);
         }
