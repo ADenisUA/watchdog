@@ -55,7 +55,7 @@
 #define TEMPERATURE_THRESHOLD       1.00f
 #define SOUND_LEVEL_THRESHOLD       2.00f
 #define LIGHT_LEVEL_THRESHOLD       2
-#define POWER_SAVER_TIMEOUT         60000
+#define POWER_SAVER_TIMEOUT         3000
 
 #define SPEED_DEFAULT               100
 #define SPEED_MINIMAL               75
@@ -98,11 +98,11 @@ long powerSaverTimeout = POWER_SAVER_TIMEOUT;
 
 float lastTemperature = -TEMPERATURE_THRESHOLD;
 float lastSoundLevel = -SOUND_LEVEL_THRESHOLD;
-uint16_t lastLightLevel = -LIGHT_LEVEL_THRESHOLD;
+float lastLightLevel = -LIGHT_LEVEL_THRESHOLD;
 
 float temperatureThreshold = TEMPERATURE_THRESHOLD;
 float soundLevelThreshold = SOUND_LEVEL_THRESHOLD;
-uint16_t lightLevelThreshold = LIGHT_LEVEL_THRESHOLD;
+float lightLevelThreshold = LIGHT_LEVEL_THRESHOLD;
 
 long lastSensorUpdateTimeStamp = 0;
 
@@ -124,7 +124,7 @@ void waitForCommand() {
   processInterruptingCommand();
   
   while (!isInterrupted()) {
-    checkPowerSavingConditions();
+    delay(DELAY_NANO);
   }
 
   processInterruptingCommand();
@@ -151,15 +151,15 @@ boolean isInterrupted() {
   return false;
 }
 
-void checkPowerSavingConditions() {
-  if (millis() > lastCommandTimeStamp + powerSaverTimeout) {
-    //Serial.println("Entering power saving mode");
-    delay(powerSaverTimeout/10);
-  } else if (millis() > lastCommandTimeStamp + powerSaverTimeout/2) {
-    //Serial.println("Entering stand by mode");
-    delay(DELAY_DEFAULT);    
-  }
-}
+//void checkPowerSavingConditions() {
+//  if (millis() > lastCommandTimeStamp + powerSaverTimeout) {
+//    //Serial.println("Entering power saving mode");
+//    delay(powerSaverTimeout/10);
+//  } else if (millis() > lastCommandTimeStamp + powerSaverTimeout/2) {
+//    //Serial.println("Entering stand by mode");
+//    delay(DELAY_DEFAULT);    
+//  }
+//}
 
 boolean hasNewCommand() {
   return Serial.available() > 0;
@@ -239,11 +239,11 @@ boolean processNonInterruptingCommand() {
 
     isProcessed = true;
   } else if (isCommand(COMMAND_SET_SOUND_LEVEL_THRESHOLD)) {
-    soundLevelThreshold = getCommandParamValueLong(lastCommand, "threshold");
+    soundLevelThreshold = getCommandParamValueFloat(lastCommand, "threshold");
 
     isProcessed = true;
   } else if (isCommand(COMMAND_SET_LIGHT_LEVEL_THRESHOLD)) {
-    lightLevelThreshold = getCommandParamValueLong(lastCommand, "threshold");
+    lightLevelThreshold = getCommandParamValueFloat(lastCommand, "threshold");
 
     isProcessed = true;
   } else if (isCommand(COMMAND_SET_TIMESTAMP)) {
@@ -334,7 +334,17 @@ void executeAndStopUntilNewCommandWithDelay() {
   } while (!isInterrupted());
 }
 
+
+long lastBackgroundProcessUpdateTimestamp = 0;
+
 void runBackgroundProcesses() {
+
+    if (millis() < lastBackgroundProcessUpdateTimestamp + DELAY_MICRO) {
+      return;
+    }
+
+    lastBackgroundProcessUpdateTimestamp = millis();
+    
     checkTemperature();
     checkSoundLevel();
     checkLightLevel();
@@ -350,15 +360,15 @@ void checkTemperature() {
 
 void checkSoundLevel() {
   float currentSoundLevel = getSoundLevel();
-  if (!equalsWithinRange(lastSoundLevel, currentSoundLevel, 15) && (lastSoundLevel == 0 || currentSoundLevel == 0 || (currentSoundLevel/lastSoundLevel > soundLevelThreshold) || (lastSoundLevel/currentSoundLevel > soundLevelThreshold))) {
+  if (!equalsWithinRange(lastSoundLevel, currentSoundLevel, 15) && (lastSoundLevel == 0 || currentSoundLevel == 0 || (currentSoundLevel > lastSoundLevel*soundLevelThreshold) || (currentSoundLevel < lastSoundLevel/soundLevelThreshold))) {
     lastSoundLevel = currentSoundLevel;
     Serial.println(generateEventJson(EVENT_SOUND_LEVEL, "soundLevel", currentSoundLevel));
   }
 }
 
 void checkLightLevel() {
-  uint16_t currentLightLevel = getLightLevel();
-  if (!equalsWithinRange(lastLightLevel, currentLightLevel, 15) && (lastLightLevel == 0 || currentLightLevel == 0 || (currentLightLevel/lastLightLevel > lightLevelThreshold) || (lastLightLevel/currentLightLevel > lightLevelThreshold))) {
+  float currentLightLevel = getLightLevel();
+  if (!equalsWithinRange(lastLightLevel, currentLightLevel, 15) && (lastLightLevel == 0 || currentLightLevel == 0 || (currentLightLevel > lastLightLevel*lightLevelThreshold) || (currentLightLevel < lastLightLevel/lightLevelThreshold))) {
     lastLightLevel = currentLightLevel;
     Serial.println(generateEventJson(EVENT_LIGHT_LEVEL, "lightLevel", currentLightLevel));   
   }
@@ -893,6 +903,11 @@ boolean hasCommanParam(String command, String paramName) {
 long getCommandParamValueLong(String command, String paramName) {
   String paramValue = getCommandParamValue(command, paramName);
   return (paramValue.length() > 0) ? paramValue.toInt() : -1;
+}
+
+long getCommandParamValueFloat(String command, String paramName) {
+  String paramValue = getCommandParamValue(command, paramName);
+  return (paramValue.length() > 0) ? paramValue.toFloat() : -1.0f;
 }
 
 /********* MOVEMENT RELATED **********/
