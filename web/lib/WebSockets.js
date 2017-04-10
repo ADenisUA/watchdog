@@ -27,14 +27,15 @@ module.exports = class WebSockets {
         this.write = function(data) {
             let result = false;
 
-            console.log("Attempting to write ", connections.length);
-
             for (let i in connections) {
                 if (connections[i] && connections[i].readyState === connections[i].OPEN) {
                     connections[i].send(data);
                     result = true;
                 }
             }
+
+            if (result) console.log("sent data to active WS connection");
+
             return result;
         }
     }
