@@ -8,7 +8,7 @@ var datachannel;
 var pcConfig = {"iceServers": [
     {"urls": [
         "stun:stun.l.google.com:19302",
-        'stun:stun.l.google.com:19302',
+        'stun:findreview.info:3478',
         'stun:stun1.l.google.com:19302',
         'stun:stun2.l.google.com:19302',
         'stun:stun3.l.google.com:19302',
@@ -125,9 +125,10 @@ function startWebRtc() {
         ws.onmessage = function (evt) {
             var msg = JSON.parse(evt.data);
             //console.log("message=" + msg);
-            console.log("type=" + msg.type);
+            console.log(msg);
+            console.log("type=" + msg.what);
 
-            switch (msg.type) {
+            switch (msg.what) {
                 case "offer":
                     pc.setRemoteDescription(new RTCSessionDescription(msg),
                         function onRemoteSdpSuccess() {
