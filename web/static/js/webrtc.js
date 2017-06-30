@@ -125,12 +125,21 @@ function startWebRtc() {
         ws.onmessage = function (evt) {
             var msg = JSON.parse(evt.data);
             //console.log("message=" + msg);
+            var what = msg.what;
+            var data = msg.data;
             console.log(msg);
-            console.log("type=" + msg.what);
 
-            switch (msg.what) {
+            if (!msg.what) {
+                /* TODO: for backward compatibility, remove this branch in the future */
+                what = msg.type;
+                data = msg; // only used for 'offer' in the switch case below
+                console.log("still using the old API?");
+            }
+            console.log("type=" + what);
+
+            switch (what) {
                 case "offer":
-                    pc.setRemoteDescription(new RTCSessionDescription(msg),
+                    pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(data)),
                         function onRemoteSdpSuccess() {
                             console.log('onRemoteSdpSucces()');
                             pc.createAnswer(function (sessionDescription) {
@@ -154,7 +163,7 @@ function startWebRtc() {
                     );
 
                     var command = {
-                        command_id: "geticecandidate"
+                        command_id: "generateIceCandidates"
                     };
                     //console.log(command);
                     ws.send(JSON.stringify(command));
@@ -170,18 +179,21 @@ function startWebRtc() {
                         Watchdog.getInstance().startStreamingFallback();
                     }
                     break;
-
                 case "geticecandidate":
+                case "iceCandidates":
                     var candidates = JSON.parse(msg.data);
                     for (var i = 0; candidates && i < candidates.length; i++) {
                         var elt = candidates[i];
-                        let candidate = new RTCIceCandidate({sdpMLineIndex: elt.sdpMLineIndex, candidate: elt.candidate});
+                        let candidate = new RTCIceCandidate({
+                            sdpMLineIndex: elt.sdpMLineIndex,
+                            candidate: elt.candidate
+                        });
                         pc.addIceCandidate(candidate,
                             function () {
-                                console.log("IceCandidate added: ", candidate);
+                                console.log("IceCandidate added: " + JSON.stringify(candidate));
                             },
                             function (error) {
-                                console.log("addIceCandidate error: ", error);
+                                console.error("addIceCandidate error: " + error);
                             }
                         );
                     }
