@@ -286,7 +286,7 @@ function onRemoteStreamAdded(event) {
     console.log("Remote stream added:", event);
     var remoteVideoElement = document.getElementById('streamingView');
     //remoteVideoElement.src = url;
-    video.srcObject=event.stream;
+    remoteVideoElement.srcObject=event.stream;
     remoteVideoElement.play();
 }
 
