@@ -281,11 +281,12 @@ function onRemoteStreamRemoved(event) {
 }
 
 function onRemoteStreamAdded(event) {
-    var url = URL.createObjectURL(event.stream);
+    //var url = URL.createObjectURL(event.stream);
     //url = url.replace("http://localhost:8080", "http://" + signalling_server_hostname + ":3001");
-    console.log("Remote stream added:", url, event);
+    console.log("Remote stream added:", event);
     var remoteVideoElement = document.getElementById('streamingView');
-    remoteVideoElement.src = url;
+    //remoteVideoElement.src = url;
+    video.srcObject=event.stream;
     remoteVideoElement.play();
 }
 
