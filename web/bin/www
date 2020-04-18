@@ -50,8 +50,9 @@ if (isProduction) {
 
     // returns an instance of node-greenlock with additional helper methods
     const lex = require('greenlock-express').create({
-        // set to https://acme-v01.api.letsencrypt.org/directory in production
-        server: 'https://acme-v01.api.letsencrypt.org/directory'
+        // set to https://acme-v02.api.letsencrypt.org/directory in production
+        server: 'https://acme-v02.api.letsencrypt.org/directory'
+        , version: 'v02'
 
         // If you wish to replace the default plugins, you may do so here
         //
